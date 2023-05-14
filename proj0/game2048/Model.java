@@ -96,7 +96,6 @@ public class Model extends Observable {
     }
 
     /** Tilt the board toward SIDE. Return true iff this changes the board.
-     *
      * 1. If two Tile objects are adjacent in the direction of motion and have
      *    the same value, they are merged into one Tile of twice the original
      *    value and that new value is added to the score instance variable
@@ -193,28 +192,28 @@ public class Model extends Observable {
      *  on the given board.
      */
     public static boolean sameValueAdjacentExists(Board b, Tile t) {
-        // Up
+        // Down
         if (t.row() - 1 >= 0) {
             Tile ts = b.tile(t.col(), t.row() - 1);
             if (sameValue(t, ts.value())) {
                 return true;
             }
         }
-        // Down
+        // Up
         if (t.row() + 1 < b.size()) {
             Tile ts = b.tile(t.col(), t.row() + 1);
             if (sameValue(t, ts.value())) {
                 return true;
             }
         }
-        // Left
+        // Right
         if (t.col() - 1 >= 0) {
             Tile ts = b.tile(t.col() - 1, t.row());
             if (sameValue(t, ts.value())) {
                 return true;
             }
         }
-        // Right
+        // Left
         if (t.col() + 1 < b.size()) {
             Tile ts = b.tile(t.col() + 1, t.row());
             if (sameValue(t, ts.value())) {
