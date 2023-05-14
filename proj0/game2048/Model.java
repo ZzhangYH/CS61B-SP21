@@ -1,7 +1,6 @@
 package game2048;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Formatter;
 import java.util.Observable;
 
@@ -111,32 +110,41 @@ public class Model extends Observable {
         boolean changed;
         changed = false;
 
+        // Change Viewing perspective according to the given side
+        // so that only need to write code for one direction.
+        board.setViewingPerspective(side);
+
         // Implementation of the up direction (Side.NORTH):
 
         // Break the board into columns.
         Tile[] tiles = findAllTiles(board);
-        Tile[][] cols = new Tile[board.size()][board.size()];
+        Tile[][] tile = new Tile[board.size()][board.size()];
         int count = 0;
         for (int i = 0; i < board.size(); i++) {
             for (int j = 0; j < board.size(); j++) {
-                cols[i][j] = tiles[count++];
+                tile[i][j] = tiles[count++];
             }
         }
 
-        // Get the moves of tiles from each column.
-        for (Tile[] col : cols) {
-            int[] move = moveCol(col);
-            for (int i = col.length - 1; i >= 0; i--) {
-                // Conduct the move.
-                if (col[i] != null) {
-                    board.move(col[i].col(), col[i].row() + move[i], col[i]);
-                }
-                // Set changed to true if move != 0
-                if (move[i] != 0) {
-                    changed = true;
+        // Iterate all columns and get the moves for each column.
+        for (int i = tile.length - 1; i >= 0; i--) {
+            int[] move = movesForCol(tile[i]);
+            // Iterate all tiles in the column.
+            for (int j = tile[i].length - 1; j >= 0; j--) {
+                // Only focus on valid (non-empty) tiles.
+                if (tile[i][j] != null) {
+                    // Conduct the move.
+                    board.move(i, j + move[j], tile[i][j]);
+                    // Set changed to true if move != 0.
+                    if (move[j] != 0) {
+                        changed = true;
+                    }
                 }
             }
         }
+
+        // Restore viewing perspective.
+        board.setViewingPerspective(Side.NORTH);
 
         checkGameOver();
         if (changed) {
@@ -148,23 +156,23 @@ public class Model extends Observable {
     /** Given a column of tiles, return an array of ints
      *  containing the relative move step for each tile.
      *  */
-    public int[] moveCol(Tile[] col) {
+    public int[] movesForCol(Tile[] col) {
         // Get the values of each tile in the given column.
         int[] val = new int[col.length];
         int count = 0;
         for (Tile t : col) {
-            if (t == null) {
-                val[count++] = 0;
-            } else {
+            if (t != null) {
                 val[count++] = t.value();
+            } else {
+                val[count++] = 0;
             }
         }
 
         // Calculate the moves for each tile:
         int[] move = new int[col.length];
 
-        // Organize the tiles remove 0s in the middle,
-        // i.e. move all valid tile to the top without merge.
+        // Organize the tiles, remove 0s in the middle,
+        // i.e. push all valid tile to the top without merge.
         for (int i = 0; i < val.length; i++) {
             int numOfZero = 0;
             for (int j = i + 1; j < val.length; j++) {
@@ -178,7 +186,9 @@ public class Model extends Observable {
         // Look for merges.
         for (int i = val.length - 1; i >= 0; i--) {
             // Skip empty spaces
-            if (val[i] == 0) continue;
+            if (val[i] == 0) {
+                continue;
+            }
             // Check if the next valid tile has the same value.
             for (int j = i - 1; j >= 0; j--) {
                 if (val[i] == val[j]) {
@@ -195,6 +205,7 @@ public class Model extends Observable {
             }
         }
 
+        // Return the list of moves for each tile in the column.
         return move;
     }
 
