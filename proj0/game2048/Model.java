@@ -1,5 +1,6 @@
 package game2048;
 
+import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.Observable;
 
@@ -133,18 +134,33 @@ public class Model extends Observable {
         return maxTileExists(b) || !atLeastOneMoveExists(b);
     }
 
+    /** A helper method to get all tiles from the board,
+     *  and return them as a list of tiles.
+     */
+    public static Tile[] findAllTiles(Board b) {
+        ArrayList<Tile> tList = new ArrayList<>();
+        // Traverse the board and append all the tiles.
+        int boardSize = b.size();
+        for (int i = 0; i < boardSize; i++) {
+            for (int j = 0; j < boardSize; j++) {
+                tList.add(b.tile(i, j));
+            }
+        }
+        // Convert to array and return.
+        Tile[] ts = new Tile[tList.size()];
+        tList.toArray(ts);
+        return ts;
+    }
+
     /** Returns true if at least one space on the Board is empty.
      *  Empty spaces are stored as null.
      * */
     public static boolean emptySpaceExists(Board b) {
-        // Get size of the board.
-        int boardSize = b.size();
         // Traverse all tiles on the board to check if any of them is empty.
-        for (int i = 0; i < boardSize; i++) {
-            for (int j = 0; j < boardSize; j++) {
-                if (b.tile(i, j) == null) {
-                    return true;
-                }
+        Tile[] allTiles = findAllTiles(b);
+        for (Tile t : allTiles) {
+            if (t == null) {
+                return true;
             }
         }
         // No empty space, return false.
