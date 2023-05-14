@@ -1,6 +1,7 @@
 package game2048;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Formatter;
 import java.util.Observable;
 
@@ -110,15 +111,91 @@ public class Model extends Observable {
         boolean changed;
         changed = false;
 
-        // TODO: Modify this.board (and perhaps this.score) to account
-        // for the tilt to the Side SIDE. If the board changed, set the
-        // changed local variable to true.
+        // Implementation of the up direction (Side.NORTH):
+
+        // Break the board into columns.
+        Tile[] tiles = findAllTiles(board);
+        Tile[][] cols = new Tile[board.size()][board.size()];
+        int count = 0;
+        for (int i = 0; i < board.size(); i++) {
+            for (int j = 0; j < board.size(); j++) {
+                cols[i][j] = tiles[count++];
+            }
+        }
+
+        // Get the moves of tiles from each column.
+        for (Tile[] col : cols) {
+            int[] move = moveCol(col);
+            for (int i = col.length - 1; i >= 0; i--) {
+                // Conduct the move.
+                if (col[i] != null) {
+                    board.move(col[i].col(), col[i].row() + move[i], col[i]);
+                }
+                // Set changed to true if move != 0
+                if (move[i] != 0) {
+                    changed = true;
+                }
+            }
+        }
 
         checkGameOver();
         if (changed) {
             setChanged();
         }
         return changed;
+    }
+
+    /** Given a column of tiles, return an array of ints
+     *  containing the relative move step for each tile.
+     *  */
+    public int[] moveCol(Tile[] col) {
+        // Get the values of each tile in the given column.
+        int[] val = new int[col.length];
+        int count = 0;
+        for (Tile t : col) {
+            if (t == null) {
+                val[count++] = 0;
+            } else {
+                val[count++] = t.value();
+            }
+        }
+
+        // Calculate the moves for each tile:
+        int[] move = new int[col.length];
+
+        // Organize the tiles remove 0s in the middle,
+        // i.e. move all valid tile to the top without merge.
+        for (int i = 0; i < val.length; i++) {
+            int numOfZero = 0;
+            for (int j = i + 1; j < val.length; j++) {
+                if (val[j] == 0) {
+                    numOfZero++;
+                }
+            }
+            move[i] = numOfZero;
+        }
+
+        // Look for merges.
+        for (int i = val.length - 1; i >= 0; i--) {
+            // Skip empty spaces
+            if (val[i] == 0) continue;
+            // Check if the next valid tile has the same value.
+            for (int j = i - 1; j >= 0; j--) {
+                if (val[i] == val[j]) {
+                    // Clear the value for later iterations.
+                    val[j] = 0;
+                    // Inc all moves from 0 to j for merge.
+                    for (int k = 0; k <= j; k++) {
+                        move[k]++;
+                    }
+                    // Add corresponding score.
+                    score += val[i] * 2;
+                    break;
+                }
+            }
+        }
+
+        return move;
     }
 
     /** Checks if the game is over and sets the gameOver variable
