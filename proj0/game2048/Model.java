@@ -134,6 +134,11 @@ public class Model extends Observable {
         return maxTileExists(b) || !atLeastOneMoveExists(b);
     }
 
+    /** Check if the given tile is valid and has the same value. */
+    public static boolean sameValue(Tile t, int val) {
+        return t != null && t.value() == val;
+    }
+
     /** A helper method to get all tiles from the board,
      *  and return them as a list of tiles.
      */
@@ -176,11 +181,47 @@ public class Model extends Observable {
         // Traverse all tiles on the board to check if MAX_PIECE exists.
         Tile[] allTiles = findAllTiles(b);
         for (Tile t : allTiles) {
-            if (t != null && t.value() == MAX_PIECE) {
+            if (sameValue(t, MAX_PIECE)) {
                 return true;
             }
         }
         // MAX_PIECE not found, return false.
+        return false;
+    }
+
+    /** Returns true if the given tile has a neighbor with the same value,
+     *  on the given board.
+     */
+    public static boolean sameValueAdjacentExists(Board b, Tile t) {
+        // Up
+        if (t.row() - 1 >= 0) {
+            Tile ts = b.tile(t.col(), t.row() - 1);
+            if (sameValue(t, ts.value())) {
+                return true;
+            }
+        }
+        // Down
+        if (t.row() + 1 < b.size()) {
+            Tile ts = b.tile(t.col(), t.row() + 1);
+            if (sameValue(t, ts.value())) {
+                return true;
+            }
+        }
+        // Left
+        if (t.col() - 1 >= 0) {
+            Tile ts = b.tile(t.col() - 1, t.row());
+            if (sameValue(t, ts.value())) {
+                return true;
+            }
+        }
+        // Right
+        if (t.col() + 1 < b.size()) {
+            Tile ts = b.tile(t.col() + 1, t.row());
+            if (sameValue(t, ts.value())) {
+                return true;
+            }
+        }
+        // None of the neighbors matched.
         return false;
     }
 
@@ -191,7 +232,20 @@ public class Model extends Observable {
      * 2. There are two adjacent tiles with the same value.
      */
     public static boolean atLeastOneMoveExists(Board b) {
-        // TODO: Fill in this function.
+        // 1. At least one empty space on the board.
+        if (emptySpaceExists(b)) {
+            return true;
+        }
+
+        // 2. Two adjacent tiles with the same value.
+        Tile[] allTiles = findAllTiles(b);
+        for (Tile t : allTiles) {
+            if (sameValueAdjacentExists(b, t)) {
+                return true;
+            }
+        }
+
+        // No valid move exists.
         return false;
     }
 
