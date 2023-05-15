@@ -91,7 +91,7 @@ Create array of objects
 
 #### Static vs. Instance Members
 
-***A class may have a mix of static and non-static members.***
+> ***A class may have a mix of static and non-static members.***
 
 **Why static?** `x = Math.round(5.6);` -> some classes never need instantiation
 
@@ -158,7 +158,7 @@ When declaring a variable of certain type:
 - Java create an internal table that maps each each variable name to a location
 - Java does NOT write anything into the reversed boxes
 
-***Golden Rule of Equals***: `y = x` copies all the bits from `x` into `y`
+> ***Golden Rule of Equals***: `y = x` copies all the bits from `x` into `y`
 
 #### Reference Types
 
@@ -172,11 +172,11 @@ When declaring a `variable` ***of any reference type***:
 - Java allocates exactly a box of size 64 bits, no matter what type of object.
 - These bits can be either set to `null` or the 64-bit address of a specific instance of that class (returned by `new`)
 
-***Reference types obey the Golden Rule of Equals!*** **copies the bits** which is actually the address.
+> ***Reference types obey the Golden Rule of Equals!*** **copies the bits** which is actually the address.
 
 #### Parameter Passing
 
-***Passing parameters also obeys the same rule***, simply **copies the bits** to the new scope.
+> ***Passing parameters also obeys the same rule***, simply **copies the bits** to the new scope.
 
 Summary of the Golden Rule:
 - `Pass by value`: 8 primitive types
