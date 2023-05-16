@@ -1,6 +1,6 @@
 # CS 61B. Data Structures, Spring 2021
 
-Great thanks to [Josh Hug](https://www2.eecs.berkeley.edu/Faculty/Homepages/joshhug.html) and [UC Berkeley](https://www.berkeley.edu) for offering such a great course. This is my self-learning notes when auditing CS 61B @ Summer 2023.
+Great thanks to [Josh Hug](https://www2.eecs.berkeley.edu/Faculty/Homepages/joshhug.html) and [UC Berkeley](https://www.berkeley.edu) for offering such a great course. The [skeleton](https://github.com/Berkeley-CS61B/skeleton-sp21), [library](https://github.com/Berkeley-CS61B/library-sp21), and [lecture code](https://github.com/Berkeley-CS61B/lectureCode-sp21) in this repository was written by [CS 61B Staff](https://github.com/Berkeley-CS61B). This is my self-learning notes when auditing CS 61B @ Summer 2023.
 
 <details>
   <summary><b>Table of Contents</b></summary>
