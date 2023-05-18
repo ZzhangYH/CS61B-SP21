@@ -1,6 +1,6 @@
 # CS 61B. Data Structures, Spring 2021
 
-Great thanks to [Josh Hug](https://www2.eecs.berkeley.edu/Faculty/Homepages/joshhug.html) and [UC Berkeley](https://www.berkeley.edu) for offering such a great course. The [skeleton](https://github.com/Berkeley-CS61B/skeleton-sp21), [library](https://github.com/Berkeley-CS61B/library-sp21), and [lecture code](https://github.com/Berkeley-CS61B/lectureCode-sp21) in this repository was written by [CS 61B Staff](https://github.com/Berkeley-CS61B). This is my self-learning notes when auditing CS 61B @ Summer 2023.
+Great thanks to [Josh Hug](https://www2.eecs.berkeley.edu/Faculty/Homepages/joshhug.html) and [UC Berkeley](https://www.berkeley.edu) for offering such a great course. The [skeleton](https://github.com/Berkeley-CS61B/skeleton-sp21), [library](https://github.com/Berkeley-CS61B/library-sp21), and [lecture code](https://github.com/Berkeley-CS61B/lectureCode-sp21) in this repository was written by [CS 61B Staff](https://github.com/Berkeley-CS61B) and modified by me for exercises. This is my self-learning notes when auditing CS 61B @ Summer 2023.
 
 <details>
   <summary><b>Table of Contents</b></summary>
@@ -21,6 +21,10 @@ Great thanks to [Josh Hug](https://www2.eecs.berkeley.edu/Faculty/Homepages/josh
     - [Parameter Passing](#parameter-passing)
     - [Instantiating Arrays](#instantiating-arrays)
     - [IntList and Linked Data Structures](#intlist-and-linked-data-structures)
+  - [Lecture 5: Node Based Lists](#lecture-5-node-based-lists)
+    - [Access Control](#access-control)
+    - [Nested Classes](#nested-classes)
+    - [Invariants](#invariants)
 
 </details>
 
@@ -197,6 +201,39 @@ Summary of the Golden Rule:
 
 - **Recursion**
 - **Iteration**
+
+### Lecture 5: Node Based Lists
+
+#### Access Control
+
+Use `private` keyword to prevent code ***in other classes*** from using members (or constructors) of a class.
+
+Hide implementation details from users of your class
+- Less for user of class to understand
+- Safe for you to change private methods (implementation)
+
+#### Nested Classes
+
+Nested Classes are useful when a class doesn't stand on its own and is obviously subordinate to another class.
+- Make the nested class `private` if the other class should NEVER use it.
+- Declare the nested class `static` if it NEVER uses the instance variables or methods of the outer class.
+
+#### Invariants
+
+An **invariant** is a ***condition that is guaranteed to be true*** during code execution.
+
+An `SLList` with a `sentinel` node has at least the following invariants:
+- The `sentinel` reference always points to a `sentinel` node.
+- The first node (if exists), is always at `sentinel.next`.
+- The `size` variable is always the total number of items that have been added.
+
+Invariants make it easier to reason about code
+- Can assume they are true to simplify code
+- Must ensure that methods preserve invariants
+
+
+
+
 
 
 
