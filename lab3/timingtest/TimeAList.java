@@ -27,7 +27,7 @@ public class TimeAList {
         AList<Integer> opCounts = new AList<>();
 
         // Different sizes of the data structure for testing.
-        int[] N = new int[]{1000, 2000, 4000, 8000, 16000, 32000, 64000, 128000, 32768000};
+        int[] N = new int[]{1000, 2000, 4000, 8000, 16000, 32000, 64000, 128000};
         for (int n : N) {
             AList<Integer> L = new AList<>();
 
