@@ -21,10 +21,20 @@ Great thanks to [Josh Hug](https://www2.eecs.berkeley.edu/Faculty/Homepages/josh
     - [Parameter Passing](#parameter-passing)
     - [Instantiating Arrays](#instantiating-arrays)
     - [IntList and Linked Data Structures](#intlist-and-linked-data-structures)
-  - [Lecture 5: Node Based Lists](#lecture-5-node-based-lists)
+  - [Lecture 5: SLLists, Nested Classes, and Sentinel Nodes](#lecture-5-sllists-nested-classes-and-sentinel-nodes)
     - [Access Control](#access-control)
     - [Nested Classes](#nested-classes)
     - [Invariants](#invariants)
+- [Week 3](#week-3)
+  - [Lecture 6: DLLists and Arrays](#lecture-6-dllists-and-arrays)
+    - [Doubly Linked Lists](#doubly-linked-lists)
+    - [Generic Lists](#generic-lists)
+    - [Arrays](#arrays)
+    - [Arrays vs. Classes](#arrays-vs-classes)
+  - [Lecture 7: ALists, Resizing, and vs. SLLists](#lecture-7-alists-resizing-and-vs-sllists)
+    - [Naive Array Lists](#naive-array-lists)
+    - [Resizing Array](#resizing-array)
+    - [Generic ALists](#generic-alists)
 
 </details>
 
@@ -123,19 +133,17 @@ Helper Methods
 ### Lecture 3: Testing
 
 ***Ad-Hoc Testing* is tedious**
-
 ```java
 for (int i = 0; i < input.length; i += 1) {
     if (!input[i].equals(expected[i])) {
-    	  System.out.println("Mismatch at position " + i + ", expected: '" + expected[i] + 
+        System.out.println("Mismatch at position " + i + ", expected: '" + expected[i] + 
                 "', but got '" + input[i] + "'");
-    	  return;
-  	}
+        return;
+    }
 }
 ```
 
 ***JUnit* is a library for making testing easier**
-
 ```java
 org.junit.Assert.assertArrayEquals(expected, input);
 ```
@@ -199,10 +207,10 @@ Summary of the Golden Rule:
 
 #### IntList and Linked Data Structures
 
-- **Recursion**
-- **Iteration**
+- ***Recursion***
+- ***Iteration***
 
-### Lecture 5: Node Based Lists
+### Lecture 5: SLLists, Nested Classes, and Sentinel Nodes
 
 #### Access Control
 
@@ -231,8 +239,131 @@ Invariants make it easier to reason about code
 - Can assume they are true to simplify code
 - Must ensure that methods preserve invariants
 
+## Week 3
 
+[`Lab 3`](https://sp21.datastructur.es/materials/lab/lab3/lab3)
 
+### Lecture 6: DLLists and Arrays
+
+`SLList` Singly Linked List; `DLList` Doubly Linked List
+
+#### Doubly Linked Lists
+
+- **Naive:** `last` sometimes points at `sentinel`, and sometimes points at an actual node
+- **Double sentinel:** have two sentinels `sentFront` and `sentBack`
+- **Circular sentinel:** `last.next = sentinel`
+
+#### Generic Lists
+
+Java allows us to **defer type selection** *until declaration*:
+```java
+public class DLList<Type> {
+    ...
+    public class IntNode {
+        public Type item;
+        ...
+    }
+    ...
+}
+```
+
+- In the `.java` file implementing data structure, specify the "generic type" only once at the top
+- In the `.java` files using data structure, specify type once
+  - Write out desire type during declaration `DLList<String> s1;`
+  - Use empty diamond operator `<>` during instantiation `s1 = new DLList<>("hello");`
+- When declaring or instantiating data structure, use ***reference type***:
+  - int: `Integer`
+  - double: `Double`
+  - long: `Long`
+  - char: `Character`
+  - boolean: `Boolean`
+
+#### Arrays
+
+`Arrays` are a special kind of object which consists of a ***numbered sequence*** of memory boxes.
+
+Arrays consist of:
+- A fixed integer **length** (*cannot change!*)
+- A sequence of `N` memory boxes where `N` = length such that
+  - All of the boxes hold the **same type of value** and **same number of bits**
+  - The boxes are numbered `0` through `N - 1`
+
+Like instance of classes:
+- Get one reference when it is created
+- (almost) Always instantiated with `new`
+- If you reassign all variables containing that reference, you can NEVER get it back
+
+Three valid notations to create an array:
+```java
+y = new int[3]; // Creates an array containing three int boxes
+x = new int[]{1, 2, 3, 4, 5};
+int[] w = {8, 9, 10} // Can omit new if also declaring variable
+```
+
+Copying an array
+- Item by item using a loop
+- Using `System.arraycopy`, it takes five parameters:
+  - **Source** array
+  - Starting position in **source**
+  - **Target** array
+  - Starting position in **target**
+  - Number to copy
+
+2D Arrays
+- **Arrays of** *array addresses*
+- Array boxes can contain references to arrays
+
+#### Arrays vs. Classes
+
+Arrays and Classes can both be used to organize a bunch of ***memory boxes***
+
+|                     | Array Boxes           | Class Boxes            |
+| ------------------- | --------------------- | ---------------------- |
+| **Access**          | `[]` notation         | `.` notation           |
+| **Type of Boxes**   | MUST be the same type | may be different types |
+| **Number of Boxes** | Fixed                 | Fixed                  |
+
+- **Array indices** can be computed at runtime
+- **Class member variable** names CANNOT be computed at runtime
+
+### Lecture 7: ALists, Resizing, and vs. SLLists
+
+#### Naive Array Lists
+
+`AList` Invariants:
+- The position of the **next item to be inserted** is always `size`.
+- The **last item** in the list is always in position `size - 1`.
+- `size` is always the number of items in the AList.
+
+#### Resizing Array
+
+When the array get too full, just make a new array：
+- Create a new array with size + 1
+- `System.arraycopy(...)`
+- Assign the address of the new array to the original array variable
+
+Suppose we have a full array of size 100:
+- If we call `addLast` two times, 203 memory boxes will be created and filled.
+- If we call `addLast` until size is 1000, about 500,000 memory boxes needed.
+
+**Resizing Slowness:** Inserting 100,000 items require roughly 5,000,000,000 new containers. ***Geometric resizing*** is much faster: `size + REFACTOR` -> `size * REFACTOR` (*how python list is implemented*)
+
+**Memory efficiency:** An AList should not only be ***efficient in time***, but also ***efficient in space***
+- Define the `usage ratio` `R = size / items.length`
+- Half array size when R < 0.25 (*typical solution*)
+
+#### Generic ALists
+
+When creating an array of references to `Item`:
+- `Item[] new Object[size];`
+- Compile warning, ignore for now
+- Just `new Item[size]` will cause a ***generic array creation*** error
+
+Unlike integer based ALists, we need to **null out deleted items**
+- Java only destroys unwanted object when the last reference has been lost.
+- Keeping references to unneeded objects is called `loitering`.
+- Save memory.
+- Don loiter.
 
 
 
