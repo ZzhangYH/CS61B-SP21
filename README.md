@@ -35,6 +35,11 @@ Great thanks to [Josh Hug](https://www2.eecs.berkeley.edu/Faculty/Homepages/josh
     - [Naive Array Lists](#naive-array-lists)
     - [Resizing Array](#resizing-array)
     - [Generic ALists](#generic-alists)
+  - [Lecture 8: Inheritance and Implementation](#lecture-8-inheritance-and-implementation)
+    - [Overriding vs. Overloading](#overriding-vs-overloading)
+    - [Interface Inheritance](#interface-inheritance)
+    - [Implementation Inheritance](#implementation-inheritance)
+    - [Static and Dynamic Type, Dynamic Type Selection](#static-and-dynamic-type-dynamic-type-selection)
 
 </details>
 
@@ -363,7 +368,76 @@ Unlike integer based ALists, we need to **null out deleted items**
 - Java only destroys unwanted object when the last reference has been lost.
 - Keeping references to unneeded objects is called `loitering`.
 - Save memory.
-- Don loiter.
+- Don't loiter.
+
+### Lecture 8: Inheritance and Implementation
+
+`SLList` and `AList` are both clearly some kind of "list":
+1. Define a reference type for the hypernym (`List61B.java`)
+   - use new keyword `interface` instead of `class`
+   - `interface` is a specification of **what to do**, not how to do it
+2. Specify that `SLList` and `AList` are hyponyms of that type
+   - add new keyword `implements`
+   - `implements` tells Java compiler that `SLList` and `AList` are hyponyms of `List61B`
+
+#### Overriding vs. Overloading
+
+`Overloading`: Java allows multiple methods with **the same name**, ***but different parameters***.
+- Unnecessary long code, virtually identical, and aesthetically gross
+- Won't work for future lists
+- Hard to maintain
+
+`Overriding`: If a subclass has a method with the **exact same signature** as in the superclass, ***we say the subclass overrides the method***.
+
+Adding `@Override` notation
+- Even without `@Override`, subclass still overrides the method
+- Protect against typos
+- Reminds programmer that method definition came from higher inheritance hierarchy
+
+#### Interface Inheritance
+
+> *The capabilities of a subclass using* `implements` *keyword is known as **interface inheritance**.*
+
+- **Interface:** The list of all method signatures
+  - *specifies what can do, but not how*
+- **Inheritance:** The subclass inherits the interface from a superclass
+  - *subclasses **MUST override all methods**, otherwise fail to compile*
+
+(*Copying the bits*) If `X` is a superclass of `Y`, the memory boxes for `X` may contain `Y`
+- An `AList` is also a list
+- List variables can hold `AList` addresses
+
+#### Implementation Inheritance
+
+> *Subclass can also inherit **signatures** AND **implementation**.*
+
+Use the `default` keyword to specify a method that subclasses should inherit from an interface
+- `default void print() {...;}`
+- Both `SLLList` and `AList` can use it
+
+Overriding `default` methods
+- Any call to `print()` on `SLList` will use this method instead of `default`
+- Use `@Override` (*optional*) to catch typos like `public void pirnt()`
+
+#### Static and Dynamic Type, Dynamic Type Selection
+
+Variables in Java has a "**compile-time type**", a.k.a. `static type`
+- This is the type specified at **declaration**
+- ***NEVER changes!***
+
+Variables also have a "**run-time type**", a.k.a. `dynamic type`
+- This is the type specified at **instantiation**
+- Equal to the type of the object being pointed at
+
+`Dynamic Method Selection`
+- compile-time type `X`
+- run-time type `Y`
+- if `Y` **overrides** the method, `Y`'s method is used instead
+- ***[Rule 1]*** At compile time: use `static type` to determine the method **signature** `S`
+- ***[Rule 2]*** At runtime: use `dynamic type` with the method of the **EXACT SAME signature** `S`
+
+
+
 
 
 
