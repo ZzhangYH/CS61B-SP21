@@ -40,6 +40,12 @@ Great thanks to [Josh Hug](https://www2.eecs.berkeley.edu/Faculty/Homepages/josh
     - [Interface Inheritance](#interface-inheritance)
     - [Implementation Inheritance](#implementation-inheritance)
     - [Static and Dynamic Type, Dynamic Type Selection](#static-and-dynamic-type-dynamic-type-selection)
+- [Week 4](#week-4)
+  - [Lecture 9: Extends, Casting, and Higher Order Functions](#lecture-9-extends-casting-and-higher-order-functions)
+    - [Implementation Inheritance - Extends](#implementation-inheritance---extends)
+    - [Encapsulation](#encapsulation)
+    - [Type Checking and Casting](#type-checking-and-casting)
+    - [Higher Order Functions](#higher-order-functions)
 
 </details>
 
@@ -436,8 +442,107 @@ Variables also have a "**run-time type**", a.k.a. `dynamic type`
 - ***[Rule 1]*** At compile time: use `static type` to determine the method **signature** `S`
 - ***[Rule 2]*** At runtime: use `dynamic type` with the method of the **EXACT SAME signature** `S`
 
+## Week 4
 
+[`Lab4`](https://sp21.datastructur.es/materials/lab/lab4/lab4)
 
+### Lecture 9: Extends, Casting, and Higher Order Functions
+
+#### Implementation Inheritance - Extends
+
+- When a class is a hyponym of an `interface`, we use `implements`
+- When a class is a hyponym of ***another class***, we use `extends`
+
+`Extends` inherits:
+- All instance and static variables
+- All methods
+- All nested classes
+- `private` members are not accessible
+
+***Constructor** is not inherited*
+- Explicitly call constructor with the `super` keyword `super();`
+- Otherwise, Java will **automatically** do it with default constructor
+- If you want to use a super constructor with parameter (*not the default one*), give parameters to `super(x);`
+
+> `Extends` *should also be used with "**is-a**" relationship instead of "**has-a**"*
+
+#### Encapsulation
+
+Tools for managing complexity
+- Hierarchical Abstraction
+  - create **layers of abstraction**, with clear abstraction barriers
+- "Design for change"
+  - organize program around objects
+  - let objects decide how things are done
+  - **hide information** others do not need
+
+> ***Implementation Inheritance Breaks Encapsulation***
+
+#### Type Checking and Casting
+
+An expression using the `new` keyword has the specific compile-time type:
+- `SLList<Integer> sl = new VengefulSLList<Integer>();`
+  - Compile-time type for the RHS expression is `VengefulSLList`
+  - `VengefulSLList` ***is-an*** `SLList`, so the assignment is allowed
+- `VengefulSLList<Integer> vsl = new SLList<Integer>();`
+  - Compile-time type of the RHS expression is `SLList`
+  - `SLList` is *not necessarily* a `VengefulSLList`, so compilation error results
+
+Method calls have compile-time type equal to their declare type:
+- `public static Dog maxDog(Dog d1, Dog d2) {...;}`
+  - Any call to `maxDog` will have a compile-time `Dog`
+
+Java have a special syntax for ***forcing the compile-time type of any expression***
+- Put **desired type** in parenthesis *before the expression*
+  - compile-time type `Dog`: `maxDog(d1, d2);`
+  - compile-time type `Poodle`: `(Poodle) maxDog(d1, d2);`
+- It is a way to trick the compiler
+- A powerful but **dangerous** tool
+  - Telling Java to treat an expression as having a different compile-time type
+  - Effectively tells the compiler to ignore its type checking duties
+
+#### Higher Order Functions
+
+> ***A function that treats another functions as data***
+
+In Java 7 or earlier
+- Memory boxes cannot contain pointers to functions
+- Can use `Interface` instead
+
+```java
+public interface IntUnaryFunction { int apply(int x); }
+
+public class TenX implements IntUnaryFunction {
+    public int apply(int x) { return 10 * x; }
+}
+
+public class HoFDemo {
+    public static int do_twice(IntUnaryFunction f, int x) {
+        return f.apply(f.apply(x));
+    }
+
+    public static void main(String[] args) {
+        System.out.println(do_twice(new TenX(), 2));
+    }
+}
+```
+
+In Java 8
+- Can hold references to methods
+
+```java
+public class Java8HoFDemo {
+    public static int tenX(int x) { return 10 * x; }
+
+    public static int doTwice(Function<Integer, Integer> f, int x) {
+        return f.apply(f.apply(x));
+    }
+
+    public static void main(String[] args) {
+        System.out.println(doTwice(Java8HoFDemo::tenX, 2));
+    }
+}
+```
 
 
 
