@@ -46,6 +46,13 @@ Great thanks to [Josh Hug](https://www2.eecs.berkeley.edu/Faculty/Homepages/josh
     - [Encapsulation](#encapsulation)
     - [Type Checking and Casting](#type-checking-and-casting)
     - [Higher Order Functions](#higher-order-functions)
+  - [Lecture 10: Subtype Polymorphism vs. HoFs](#lecture-10-subtype-polymorphism-vs-hofs)
+    - [Subtype Polymorphism](#subtype-polymorphism)
+  - [Lecture 11: Exceptions, Iterators, and Object Methods](#lecture-11-exceptions-iterators-and-object-methods)
+    - [Lists and Sets in Java](#lists-and-sets-in-java)
+    - [Exceptions](#exceptions)
+    - [Iteration](#iteration)
+    - [`toString()` and Equals](#tostring-and-equals)
 
 </details>
 
@@ -543,6 +550,84 @@ public class Java8HoFDemo {
     }
 }
 ```
+
+### Lecture 10: Subtype Polymorphism vs. HoFs
+
+Recap of **Dynamic Methods Selection**:
+- Compiler allows memory boxes to *hold any subtype*
+- Compiler allows **calls based on static type**
+- **Overridden non-static methods are selected at runtime based on dynamic type**
+- Everything else is based on static type (*including overloaded methods*)
+
+#### Subtype Polymorphism
+
+> ***Polymorphism:** Providing a single interface to entities of different types.*
+
+`Interface` provide us with ability to make ***callbacks***:
+- Sometimes a function needs the help of another function that might not haven been written yet
+- Some languages handle this using explicit function passing
+- In Java, we do this by wrapping up the needed function in an `interface`
+  - `Arrays.sort` needs `compare` that lives inside `Comparator` interface
+  - `Arrays.sort` "*calls back*" whenever it needs a comparison
+
+### Lecture 11: Exceptions, Iterators, and Object Methods
+
+#### Lists and Sets in Java
+
+Lists in real Java
+- `List61B<Integer> L = new AList<>();`
+- `java.util.List<Integer> L = new java.util.ArrayList<>();`
+
+Sets in real Java
+- `Set<String> S = new HashSet<>();`
+
+#### Exceptions
+
+> ***When something goes really wrong, break the normal flow of control.***
+
+Explicit Exceptions
+- Throw our own exceptions using the `throw` keyword
+- Can provide informative message to a user
+- Can provide more information to code that "catches" the exception
+
+#### Iteration
+
+Java allows us to iterate through `List` and `Set` using a convenient shorthand syntax sometimes called the "*foreach*" or "*enhanced for*" loop.
+
+To support **ugly iteration**:
+```java
+Iterator<Integer> seer = javaset.iterator();
+while (aseer.hasNext()) {
+    System.out.println(seer.next());
+}
+```
+- Add an `iterator()` method to `ArraySet` that returns an `Iterator<T>`
+- The `Iterator<T>` returned should have a useful `hasNext()` and `next()` method
+
+To support the ***enhanced for* loop**:
+```java
+for (int x : javaset) {
+    System.out.println(x);
+}
+```
+- Complete the above support for ugly iteration
+- Add `implements Iterable<T>` to the line defining the class
+
+#### `toString()` and Equals
+
+The `toString()` method provides a string representation of an object
+- `System.out.println(Object x)` calls `x.toString()`
+- The implementation of `toString()` in `Object`
+  - name of the class
+  - @ sign
+  - memory location of the object
+
+`.equals` vs. `==`
+- `==` compares the bits. For references, `==` means *referencing the same object*
+- `.equals` for classes, requiring overriding `.equals` for the class
+  - default implementation of `.equals` uses `==` (*NOT what we want*)
+  - use `Arrays.equals` or `Arrays.deepEquals` for arrays
+
 
 
 
