@@ -1,9 +1,6 @@
 package deque;
 
 import org.junit.Test;
-
-import java.util.Optional;
-
 import static org.junit.Assert.*;
 
 
@@ -116,7 +113,7 @@ public class LinkedListDequeTest {
     }
 
     @Test
-
+    /** Check if get and getRecursive methods returns correctly. */
     public void getTest() {
         // Tests for null returns.
         LinkedListDeque<Integer> lld1 = new LinkedListDeque<Integer>();
