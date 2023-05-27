@@ -1,11 +1,13 @@
 package deque;
 
-public class LinkedListDeque<T> {
+import java.util.Iterator;
+
+public class LinkedListDeque<T> implements Iterable<T> {
 
     private static class Node<T> {
-        public T item;
-        public Node<T> prev;
-        public Node<T> next;
+        private final T item;
+        private Node<T> prev;
+        private Node<T> next;
         public Node(T item) {
             this.item = item;
             this.prev = null;
@@ -44,12 +46,12 @@ public class LinkedListDeque<T> {
         size += 1;
     }
 
-    /** Return true if deque is empty, false otherwise. */
+    /** Returns true if deque is empty, false otherwise. */
     public boolean isEmpty() {
         return size == 0;
     }
 
-    /** Return the number of items in the deque. */
+    /** Returns the number of items in the deque. */
     public int size() {
         return size;
     }
@@ -79,11 +81,11 @@ public class LinkedListDeque<T> {
             return null;
         }
         // Use item to hold the return node.
-        T item = sentinel.next.item;
+        T returnItem = sentinel.next.item;
         sentinel.next = sentinel.next.next;
         sentinel.next.next.prev = sentinel;
         size -= 1;
-        return item;
+        return returnItem;
     }
 
     /** Removes and returns the item at the back of the deque. */
@@ -93,14 +95,14 @@ public class LinkedListDeque<T> {
             return null;
         }
         // Use item to hold the return node.
-        T item = sentinel.prev.item;
+        T returnItem = sentinel.prev.item;
         sentinel.prev = sentinel.prev.prev;
         sentinel.prev.prev.next = sentinel;
         size -= 1;
-        return item;
+        return returnItem;
     }
 
-    /** Get the item at the given index, using iteration. */
+    /** Gets the item at the given index, using iteration. */
     public T get(int index) {
         // If no such item exists, return null.
         if (index < 0 || index > size - 1) {
@@ -114,7 +116,7 @@ public class LinkedListDeque<T> {
         return temp.item;
     }
 
-    /** Get the item at the given index, using recursion. */
+    /** Gets the item at the given index, using recursion. */
     public T getRecursive(int index) {
         // If no such item exists, return null.
         if (index < 0 || index > size - 1) {
@@ -134,5 +136,64 @@ public class LinkedListDeque<T> {
             return nodeRecursion(index - 1, node.next);
         }
     }
-    
+
+    /** Returns a LinkedListDeque iterator. */
+    @Override
+    public Iterator<T> iterator() {
+        return new LLDequeItr();
+    }
+
+    private class LLDequeItr implements Iterator<T> {
+        private Node<T> cursor;
+
+        public LLDequeItr() {
+            cursor = sentinel.next;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return cursor != sentinel;
+        }
+
+        @Override
+        public T next() {
+            T returnItem = cursor.item;
+            cursor = cursor.next;
+            return returnItem;
+        }
+    }
+
+    /** Returns whether or not the parameter o is equal to the deque. */
+    @Override
+    public boolean equals(Object o) {
+        // True if the same reference.
+        if (this == o) {
+            return true;
+        }
+        // False if o is null.
+        if (o == null) {
+            return false;
+        }
+        // Check for type casting.
+        if (!(o instanceof LinkedListDeque)) {
+            return false;
+        }
+        LinkedListDeque<T> that = (LinkedListDeque<T>) o;
+        // False if size is different.
+        if (this.size != that.size) {
+            return false;
+        }
+        // Traverse both deque and check each item in the array.
+        Node<T> s1 = this.sentinel.next;
+        Node<T> s2 = that.sentinel.next;
+        for (int i = 0; i < this.size; i++) {
+            if (s1.item != s2.item) {
+                return false;
+            }
+            s1 = s1.next;
+            s2 = s2.next;
+        }
+        return true;
+    }
+
 }

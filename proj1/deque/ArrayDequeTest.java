@@ -8,7 +8,7 @@ import static org.junit.Assert.*;
 public class ArrayDequeTest {
 
     @Test
-    /** Adds a few things to the array, checking isEmpty() and size() are correct,
+    /* Adds a few things to the array, checking isEmpty() and size() are correct,
      * finally printing the results.
      *
      * && is the "and" operation. */
@@ -34,7 +34,7 @@ public class ArrayDequeTest {
     }
 
     @Test
-    /** Adds an item, then removes an item, and ensures that ad is empty afterwards. */
+    /* Adds an item, then removes an item, and ensures that ad is empty afterwards. */
     public void addRemoveTest() {
         ArrayDeque<Integer> ad1 = new ArrayDeque<Integer>();
         // should be empty
@@ -96,7 +96,7 @@ public class ArrayDequeTest {
     }
 
     @Test
-    /** Check if get and getRecursive methods returns correctly. */
+    /* Check if get and getRecursive methods returns correctly. */
     public void getTest() {
         // Tests for null returns.
         ArrayDeque<Integer> ad1 = new ArrayDeque<Integer>();
@@ -119,4 +119,36 @@ public class ArrayDequeTest {
         assertEquals("Should have the same value", 7, ad2.get(7), 0.0);
         assertEquals("Should have the same value", 3, ad2.get(3), 0.0);
     }
+
+    @Test
+    /* Check the functionalities of equals method. */
+    public void equalsTest() {
+        ArrayDeque<Integer> lld1 = new ArrayDeque<Integer>();
+        lld1.addLast(1);
+        lld1.addLast(2);
+        lld1.addLast(3);
+        ArrayDeque<Integer> lld2 = new ArrayDeque<Integer>();
+        lld2.addLast(1);
+        lld2.addLast(2);
+        lld2.addLast(3);
+        ArrayDeque<Integer> lld3 = new ArrayDeque<Integer>();
+        lld3.addLast(1);
+        lld3.addLast(2);
+        lld3.addLast(3);
+        lld3.addLast(4);
+        ArrayDeque<Integer> lld4 = lld1;
+        ArrayDeque<Integer> lld5 = lld2;
+
+        assertFalse("Should not equal to null", lld1.equals(null));
+        assertFalse("Should not equal to other types", lld1.equals(new LinkedListDeque<Integer>()));
+        assertTrue("Should be true", lld1.equals(lld2));
+        assertTrue("Should be true", lld1.equals(lld4));
+        assertTrue("Should be true", lld2.equals(lld4));
+        assertTrue("Should be true", lld5.equals(lld1));
+        assertFalse("Should be false", lld1.equals(lld3));
+        assertFalse("Should be false", lld2.equals(lld3));
+        assertFalse("Should be false", lld3.equals(lld4));
+        assertFalse("Should be false", lld3.equals(lld5));
+    }
+
 }

@@ -1,6 +1,8 @@
 package deque;
 
-public class ArrayDeque<T> {
+import java.util.Iterator;
+
+public class ArrayDeque<T> implements Iterable<T> {
 
     private int size;
     private T[] items;
@@ -39,12 +41,12 @@ public class ArrayDeque<T> {
         size += 1;
     }
 
-    /** Return true if deque is empty, false otherwise. */
+    /** Returns true if deque is empty, false otherwise. */
     public boolean isEmpty() {
         return size == 0;
     }
 
-    /** Return the number of items in the deque. */
+    /** Returns the number of items in the deque. */
     public int size() {
         return size;
     }
@@ -96,13 +98,70 @@ public class ArrayDeque<T> {
         return returnItem;
     }
 
-    /** Get the item at the given index, using iteration. */
+    /** Gets the item at the given index, using iteration. */
     public T get(int index) {
         // If no such item exists, return null.
         if (index < 0 || index > size - 1) {
             return null;
         }
         return items[index];
+    }
+
+    /** Returns an ArrayDeque iterator. */
+    @Override
+    public Iterator<T> iterator() {
+        return new ADequeItr();
+    }
+
+    private class ADequeItr implements Iterator<T> {
+        private int cursor;
+
+        public ADequeItr() {
+            cursor = 0;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return cursor < size;
+        }
+
+        @Override
+        public T next() {
+            T returnItem = items[cursor];
+            cursor += 1;
+            return returnItem;
+        }
+    }
+
+    /** Returns whether or not the parameter o is equal to the deque. */
+    @Override
+    public boolean equals(Object o) {
+        // True if the same reference.
+        if (this == o) {
+            return true;
+        }
+        // False if o is null.
+        if (o == null) {
+            return false;
+        }
+        // Check for type casting.
+        if (!(o instanceof ArrayDeque)) {
+            return false;
+        }
+        ArrayDeque<T> that = (ArrayDeque<T>) o;
+        // False if size is different.
+        if (this.size != that.size) {
+            return false;
+        }
+        // Traverse both deque and check the item of each node.
+        T[] s1 = this.items;
+        T[] s2 = that.items;
+        for (int i = 0; i < this.size; i++) {
+            if (s1[i] != s2[i]) {
+                return false;
+            }
+        }
+        return true;
     }
 
 }

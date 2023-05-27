@@ -8,7 +8,7 @@ import static org.junit.Assert.*;
 public class LinkedListDequeTest {
 
     @Test
-    /** Adds a few things to the list, checking isEmpty() and size() are correct,
+    /* Adds a few things to the list, checking isEmpty() and size() are correct,
      * finally printing the results.
      *
      * && is the "and" operation. */
@@ -34,7 +34,7 @@ public class LinkedListDequeTest {
     }
 
     @Test
-    /** Adds an item, then removes an item, and ensures that dll is empty afterwards. */
+    /* Adds an item, then removes an item, and ensures that dll is empty afterwards. */
     public void addRemoveTest() {
         LinkedListDeque<Integer> lld1 = new LinkedListDeque<Integer>();
 		// should be empty
@@ -113,7 +113,7 @@ public class LinkedListDequeTest {
     }
 
     @Test
-    /** Check if get and getRecursive methods returns correctly. */
+    /* Check if get and getRecursive methods returns correctly. */
     public void getTest() {
         // Tests for null returns.
         LinkedListDeque<Integer> lld1 = new LinkedListDeque<Integer>();
@@ -121,7 +121,7 @@ public class LinkedListDequeTest {
         assertNull("Should return null when calling get on an empty deque", lld1.get(0));
         assertNull("Should return null when calling get on an empty deque", lld1.getRecursive(0));
 
-        lld1.addFirst(1);
+        lld1.addLast(1);
         lld1.addLast(2);
         lld1.addLast(3);
         assertNull("Should return null if the index is invalid", lld1.get(-1));
@@ -143,4 +143,36 @@ public class LinkedListDequeTest {
         assertEquals("Should have the same value", 999999, lld2.get(999999), 0.0);
         assertEquals("Should have the same value", 10000, lld2.getRecursive(10000), 0.0);
     }
+
+    @Test
+    /* Check the functionalities of equals method. */
+    public void equalsTest() {
+        LinkedListDeque<Integer> lld1 = new LinkedListDeque<Integer>();
+        lld1.addLast(1);
+        lld1.addLast(2);
+        lld1.addLast(3);
+        LinkedListDeque<Integer> lld2 = new LinkedListDeque<Integer>();
+        lld2.addLast(1);
+        lld2.addLast(2);
+        lld2.addLast(3);
+        LinkedListDeque<Integer> lld3 = new LinkedListDeque<Integer>();
+        lld3.addLast(1);
+        lld3.addLast(2);
+        lld3.addLast(3);
+        lld3.addLast(4);
+        LinkedListDeque<Integer> lld4 = lld1;
+        LinkedListDeque<Integer> lld5 = lld2;
+
+        assertFalse("Should not equal to null", lld1.equals(null));
+        assertFalse("Should not equal to other types", lld1.equals(new ArrayDeque<Integer>()));
+        assertTrue("Should be true", lld1.equals(lld2));
+        assertTrue("Should be true", lld1.equals(lld4));
+        assertTrue("Should be true", lld2.equals(lld4));
+        assertTrue("Should be true", lld5.equals(lld1));
+        assertFalse("Should be false", lld1.equals(lld3));
+        assertFalse("Should be false", lld2.equals(lld3));
+        assertFalse("Should be false", lld3.equals(lld4));
+        assertFalse("Should be false", lld3.equals(lld5));
+    }
+
 }
