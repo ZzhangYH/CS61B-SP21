@@ -2,7 +2,7 @@ package deque;
 
 import java.util.Iterator;
 
-public class ArrayDeque<T> implements Iterable<T> {
+public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
 
     private int size;
     private T[] items;
@@ -21,6 +21,7 @@ public class ArrayDeque<T> implements Iterable<T> {
     }
 
     /** Adds an item of type T to the front of the deque. */
+    @Override
     public void addFirst(T item) {
         // Checks if the array needs resizing.
         if (size == items.length) {
@@ -32,6 +33,7 @@ public class ArrayDeque<T> implements Iterable<T> {
     }
 
     /** Adds an item of type T to the back of the deque. */
+    @Override
     public void addLast(T item) {
         // Checks if the array needs resizing.
         if (size == items.length) {
@@ -41,17 +43,14 @@ public class ArrayDeque<T> implements Iterable<T> {
         size += 1;
     }
 
-    /** Returns true if deque is empty, false otherwise. */
-    public boolean isEmpty() {
-        return size == 0;
-    }
-
     /** Returns the number of items in the deque. */
+    @Override
     public int size() {
         return size;
     }
 
     /** Prints the items in the deque from first to last. */
+    @Override
     public void printDeque() {
         // Print nothing if the deque is empty.
         if (isEmpty()) {
@@ -67,6 +66,7 @@ public class ArrayDeque<T> implements Iterable<T> {
     }
 
     /** Removes and returns the item at the front of the deque. */
+    @Override
     public T removeFirst() {
         // If no such item exists, return null.
         if (isEmpty()) {
@@ -83,6 +83,7 @@ public class ArrayDeque<T> implements Iterable<T> {
     }
 
     /** Removes and returns the item at the back of the deque. */
+    @Override
     public T removeLast() {
         // If no such item exists, return null.
         if (isEmpty()) {
@@ -99,6 +100,7 @@ public class ArrayDeque<T> implements Iterable<T> {
     }
 
     /** Gets the item at the given index, using iteration. */
+    @Override
     public T get(int index) {
         // If no such item exists, return null.
         if (index < 0 || index > size - 1) {

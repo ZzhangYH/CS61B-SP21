@@ -2,7 +2,7 @@ package deque;
 
 import java.util.Iterator;
 
-public class LinkedListDeque<T> implements Iterable<T> {
+public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
 
     private static class Node<T> {
         private final T item;
@@ -27,6 +27,7 @@ public class LinkedListDeque<T> implements Iterable<T> {
     }
 
     /** Adds an item of type T to the front of the deque. */
+    @Override
     public void addFirst(T item) {
         Node<T> newNode = new Node<>(item);
         newNode.prev = sentinel;
@@ -37,6 +38,7 @@ public class LinkedListDeque<T> implements Iterable<T> {
     }
 
     /** Adds an item of type T to the back of the deque. */
+    @Override
     public void addLast(T item) {
         Node<T> newNode = new Node<>(item);
         newNode.prev = sentinel.prev;
@@ -46,17 +48,14 @@ public class LinkedListDeque<T> implements Iterable<T> {
         size += 1;
     }
 
-    /** Returns true if deque is empty, false otherwise. */
-    public boolean isEmpty() {
-        return size == 0;
-    }
-
     /** Returns the number of items in the deque. */
+    @Override
     public int size() {
         return size;
     }
 
     /** Prints the items in the deque from first to last. */
+    @Override
     public void printDeque() {
         // Print nothing if the deque is empty.
         if (isEmpty()) {
@@ -75,6 +74,7 @@ public class LinkedListDeque<T> implements Iterable<T> {
     }
 
     /** Removes and returns the item at the front of the deque. */
+    @Override
     public T removeFirst() {
         // If no such item exists, return null.
         if (isEmpty()) {
@@ -89,6 +89,7 @@ public class LinkedListDeque<T> implements Iterable<T> {
     }
 
     /** Removes and returns the item at the back of the deque. */
+    @Override
     public T removeLast() {
         // If no such item exists, return null.
         if (isEmpty()) {
@@ -103,6 +104,7 @@ public class LinkedListDeque<T> implements Iterable<T> {
     }
 
     /** Gets the item at the given index, using iteration. */
+    @Override
     public T get(int index) {
         // If no such item exists, return null.
         if (index < 0 || index > size - 1) {
