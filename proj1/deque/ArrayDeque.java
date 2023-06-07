@@ -73,7 +73,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
             return null;
         }
         // Halving the size of the array deque when USING_RATIO < 0.25 for memory efficiency.
-        if (size > 16 && size < items.length * 0.25) {
+        if (size >= 4 && size < items.length * 0.25) {
             newItems(items.length / 2, 0, 0, size);
         }
         T returnItem = items[0];
@@ -90,7 +90,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
             return null;
         }
         // Halving the size of the array deque when USING_RATIO < 0.25 for memory efficiency.
-        if (size > 16 && size < items.length * 0.25) {
+        if (size >= 4 && size < items.length * 0.25) {
             newItems(items.length / 2, 0, 0, size);
         }
         T returnItem = items[size - 1];
@@ -139,7 +139,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
     @Override
     public boolean equals(Object o) {
         // True if the same reference.
-        if (this == o) {
+        if (o == this) {
             return true;
         }
         // False if o is null.
@@ -150,16 +150,14 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
         if (!(o instanceof ArrayDeque)) {
             return false;
         }
-        ArrayDeque<T> that = (ArrayDeque<T>) o;
+        ArrayDeque<?> that = (ArrayDeque<?>) o;
         // False if size is different.
         if (this.size != that.size) {
             return false;
         }
         // Traverse both deque and check the item of each node.
-        T[] s1 = this.items;
-        T[] s2 = that.items;
         for (int i = 0; i < this.size; i++) {
-            if (s1[i] != s2[i]) {
+            if (this.get(i) != that.get(i)) {
                 return false;
             }
         }

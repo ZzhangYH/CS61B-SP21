@@ -83,7 +83,7 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
         // Use item to hold the return node.
         T returnItem = sentinel.next.item;
         sentinel.next = sentinel.next.next;
-        sentinel.next.next.prev = sentinel;
+        sentinel.next.prev = sentinel;
         size -= 1;
         return returnItem;
     }
@@ -98,7 +98,7 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
         // Use item to hold the return node.
         T returnItem = sentinel.prev.item;
         sentinel.prev = sentinel.prev.prev;
-        sentinel.prev.prev.next = sentinel;
+        sentinel.prev.next = sentinel;
         size -= 1;
         return returnItem;
     }
@@ -169,7 +169,7 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
     @Override
     public boolean equals(Object o) {
         // True if the same reference.
-        if (this == o) {
+        if (o == this) {
             return true;
         }
         // False if o is null.
@@ -180,20 +180,16 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
         if (!(o instanceof LinkedListDeque)) {
             return false;
         }
-        LinkedListDeque<T> that = (LinkedListDeque<T>) o;
+        LinkedListDeque<?> that = (LinkedListDeque<?>) o;
         // False if size is different.
         if (this.size != that.size) {
             return false;
         }
         // Traverse both deque and check each item in the array.
-        Node<T> s1 = this.sentinel.next;
-        Node<T> s2 = that.sentinel.next;
         for (int i = 0; i < this.size; i++) {
-            if (s1.item != s2.item) {
+            if (this.get(i) != that.get(i)) {
                 return false;
             }
-            s1 = s1.next;
-            s2 = s2.next;
         }
         return true;
     }
