@@ -13,7 +13,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
         size = 0;
     }
 
-    /** Creates a new array, takes source, destination position and capacity for resizing and copying. */
+    /** Creates a new array for resizing and copying. */
     private void newItems(int capacity, int srcPos, int destPos, int length) {
         T[] newItems = (T[]) new Object[capacity];
         System.arraycopy(items, srcPos, newItems, destPos, length);
@@ -118,7 +118,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
     private class ADequeItr implements Iterator<T> {
         private int cursor;
 
-        public ADequeItr() {
+        ADequeItr() {
             cursor = 0;
         }
 

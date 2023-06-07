@@ -8,7 +8,7 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
         private final T item;
         private Node<T> prev;
         private Node<T> next;
-        public Node(T item) {
+        Node(T item) {
             this.item = item;
             this.prev = null;
             this.next = null;
@@ -148,7 +148,7 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
     private class LLDequeItr implements Iterator<T> {
         private Node<T> cursor;
 
-        public LLDequeItr() {
+        LLDequeItr() {
             cursor = sentinel.next;
         }
 
