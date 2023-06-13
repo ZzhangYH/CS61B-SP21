@@ -6,18 +6,32 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
 
     private int size;
     private T[] items;
+    private int first;
+    private int last;
 
     /** Creates an empty array deque. */
     public ArrayDeque() {
         items = (T[]) new Object[8];
+        first = 0;
+        last = 0;
         size = 0;
     }
 
-    /** Creates a new array for resizing and copying. */
-    private void newItems(int capacity, int srcPos, int destPos, int length) {
+    /** Resizes the array. */
+    private void resize(int capacity) {
         T[] newItems = (T[]) new Object[capacity];
-        System.arraycopy(items, srcPos, newItems, destPos, length);
+        int temp = 0;
+        for (int i = 0; i < size; i++) {
+            newItems[temp] = items[(first + i) % items.length];
+            temp += 1;
+        }
         items = newItems;
+        first = 0;
+        if (isEmpty()) {
+            last = 0;
+        } else {
+            last = temp - 1;
+        }
     }
 
     /** Adds an item of type T to the front of the deque. */
@@ -25,10 +39,12 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
     public void addFirst(T item) {
         // Checks if the array needs resizing.
         if (size == items.length) {
-            newItems(size * 2, 0, 0, size);
+            resize(size * 2);
         }
-        newItems(items.length, 0, 1, size);
-        items[0] = item;
+        if (!isEmpty()) {
+            first = (first + items.length - 1) % items.length;
+        }
+        items[first] = item;
         size += 1;
     }
 
@@ -37,9 +53,12 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
     public void addLast(T item) {
         // Checks if the array needs resizing.
         if (size == items.length) {
-            newItems(size * 2, 0, 0, size);
+            resize(size * 2);
         }
-        items[size] = item;
+        if (!isEmpty()) {
+            last = (last + 1) % items.length;
+        }
+        items[last] = item;
         size += 1;
     }
 
@@ -57,10 +76,10 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
             return;
         }
         StringBuilder printStr = new StringBuilder();
-        printStr.append(items[0]);
+        printStr.append(items[first]);
         for (int i = 1; i < size; i++) {
             printStr.append(" ");
-            printStr.append(items[i]);
+            printStr.append(items[(first + i) % items.length]);
         }
         System.out.println(printStr);
     }
@@ -73,11 +92,14 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
             return null;
         }
         // Halving the size of the array deque when USING_RATIO < 0.25 for memory efficiency.
-        if (size >= 4 && size < items.length * 0.25) {
-            newItems(items.length / 2, 0, 0, size);
+        if (items.length >= 16 && size < items.length * 0.25) {
+            resize(items.length / 2);
         }
-        T returnItem = items[0];
-        newItems(items.length, 1, 0, size - 1);
+        T returnItem = items[first];
+        items[first] = null;
+        if (size > 1) {
+            first = (first + 1) % items.length;
+        }
         size -= 1;
         return returnItem;
     }
@@ -90,11 +112,14 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
             return null;
         }
         // Halving the size of the array deque when USING_RATIO < 0.25 for memory efficiency.
-        if (size >= 4 && size < items.length * 0.25) {
-            newItems(items.length / 2, 0, 0, size);
+        if (items.length >= 16 && size < items.length * 0.25) {
+            resize(items.length / 2);
         }
-        T returnItem = items[size - 1];
-        items[size - 1] = null;
+        T returnItem = items[last];
+        items[last] = null;
+        if (size > 1) {
+            last = (last + items.length - 1) % items.length;
+        }
         size -= 1;
         return returnItem;
     }
@@ -106,7 +131,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
         if (index < 0 || index > size - 1) {
             return null;
         }
-        return items[index];
+        return items[(first + index) % items.length];
     }
 
     /** Returns an ArrayDeque iterator. */
