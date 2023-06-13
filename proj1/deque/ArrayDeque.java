@@ -154,7 +154,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
 
         @Override
         public T next() {
-            T returnItem = items[cursor];
+            T returnItem = get(cursor);
             cursor += 1;
             return returnItem;
         }
@@ -172,15 +172,15 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
             return false;
         }
         // Check for type casting.
-        if (!(o instanceof ArrayDeque)) {
+        if (!(o instanceof Deque)) {
             return false;
         }
-        ArrayDeque<T> that = (ArrayDeque<T>) o;
+        Deque<T> that = (Deque<T>) o;
         // False if size is different.
-        if (this.size != that.size) {
+        if (this.size() != that.size()) {
             return false;
         }
-        // Traverse both deque and check the item of each node.
+        // Traverse both deque and check each item in the array.
         for (int i = 0; i < this.size; i++) {
             if (!this.get(i).equals(that.get(i))) {
                 return false;

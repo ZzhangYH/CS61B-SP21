@@ -177,15 +177,15 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
             return false;
         }
         // Check for type casting.
-        if (!(o instanceof LinkedListDeque)) {
+        if (!(o instanceof Deque)) {
             return false;
         }
-        LinkedListDeque<T> that = (LinkedListDeque<T>) o;
+        Deque<T> that = (Deque<T>) o;
         // False if size is different.
-        if (this.size != that.size) {
+        if (this.size() != that.size()) {
             return false;
         }
-        // Traverse both deque and check each item in the array.
+        // Traverse both deque and check the item of each node.
         for (int i = 0; i < this.size; i++) {
             if (!this.get(i).equals(that.get(i))) {
                 return false;
