@@ -52,6 +52,13 @@ Notes taken when auditing CS 61B, please refer to the original slides and lectur
     - [Exceptions](#exceptions)
     - [Iteration](#iteration)
     - [`toString()` and Equals](#tostring-and-equals)
+- [Week 5](#week-5)
+  - [Lecture 12: Command Line Programming, Git, and Project 2 Preview](#lecture-12-command-line-programming-git-and-project-2-preview)
+  - [Lecture 13: Asymptotics I](#lecture-13-asymptotics-i)
+    - [Intuitive Runtime Characterizations](#intuitive-runtime-characterizations)
+    - [Worst Case Order of Growth](#worst-case-order-of-growth)
+    - [Big Theta](#big-theta)
+    - [Big O Notation](#big-o-notation)
 
 </details>
 
@@ -615,6 +622,117 @@ The `toString()` method provides a string representation of an object
 - `.equals` for classes, requiring overriding `.equals` for the class
   - default implementation of `.equals` uses `==` (*NOT what we want*)
   - use `Arrays.equals` or `Arrays.deepEquals` for arrays
+
+## Week 5
+
+### Lecture 12: Command Line Programming, Git, and Project 2 Preview
+
+### Lecture 13: Asymptotics I
+
+#### Intuitive Runtime Characterizations
+
+```java
+public static boolean dup1(int[] A) {  
+    for (int i = 0; i < A.length; i += 1) {
+        for (int j = i + 1; j < A.length; j += 1) {
+            if (A[i] == A[j]) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+public static boolean dup2(int[] A) {
+    for (int i = 0; i < A.length - 1; i += 1) {
+        if (A[i] == A[i + 1]) { 
+            return true; 
+        }
+    }
+    return false;
+}
+```
+
+*Technique 1: Measure execution time in seconds using a client program*
+- Good: Easy to measure, meaning is obvious.
+- Bad: May require large amounts of computation time. Result varies with machine, compiler, input data, etc.
+
+*Technique 2A: Count possible operations for an array of size N = 10000*
+- Good: Machine independent. Input dependence captured in model.
+- Bad: Tedious to compute. Array size was arbitrary. Doesn't tell you actual time.
+
+*Technique 2B: Count possible operations in terms of input array size N*
+- Good: Machine independent. Input dependence captured in model. Tells you how algorithm ***scales***.
+- Bad: Tedious to compute. Array size was arbitrary. Doesn't tell you actual time.
+
+**Comparing algorithms**
+
+| Operation        | `dup1`            | `dup2`    |
+| ---------------- | ----------------- | --------- |
+| `i = 0`          | 1                 | 1         |
+| `j = i + 1`      | 1 to N            |           |
+| Less then `<`    | 2 to (N^2+3N+2)/2 | 0 to N    |
+| Increment `+= 1` | 0 to (N^2+N)/2    | 0 to N-1  |
+| Equals `==`      | 1 to (N^2-N)/2    | 1 to N-1  |
+| Array Accesses   | 2 to N^2-N        | 2 to 2N-2 |
+
+- Fewer operations to do the same work [e.g. 50,015,001 vs. 10000 operations]
+- Better answer: Algorithm **scales better** *in the worst case* [(N^2+3N+2)/2 vs. N]
+- Even better answer: **Parabolas (N^2) grow faster than lines (N)**
+
+> *Algorithms which **scale well** (e.g. look like **lines**) have better asymptotic runtime behavior than algorithms that scale relatively poorly (e.g. look like **parabolas**).*
+
+In most cases, we care only about `asymptotic behavior`, *i.e. what happens for very large N*.
+- Simulation of billions of interacting particles
+- Social network with billions of users
+- Logging of billions of transactions
+- Encoding of billions of bytes of video data
+
+#### Worst Case Order of Growth
+
+*Simplification 1: Consider only the worst case*
+- Justification: When comparing algorithms, we often care only about the worst case.
+
+*Simplification 2: Pick some representative operation to act as a proxy for the overall runtime*
+- Good choice: **Increment** ((N^2+N)/2)
+- Bad choice: `j = i + 1` (N)
+
+*Simplification 3: Ignore lower order terms*
+- (N^2+N)/2 -> (N^2)/2
+
+*Simplification 4: Ignore multiplicative constants*
+- (N^2)/2 -> N^2
+- Why? It has no real meaning. We already threw away information when we choose a single proxy operation.
+
+> *These simplifications are OK because we only care about the* `order of growth` *of the runtime.*
+
+#### Big Theta
+
+Suppose we have a function $R(N)$ with the order of growth of $f(N)$
+- In `Big Theta` notation we write this as $R(N) \in \Theta (f(N))$
+- $N^3 + 3N^4 \in \Theta (N^4)$
+- $1/N + N^3 \in \Theta (N^3)$
+- $1/N + 5 \in \Theta (1)$
+- $Ne^N + N \in \Theta (Ne^N)$
+- $40 \sin (N) + 4N^2 \in \Theta (N^2)$
+
+#### Big O Notation
+
+Whereas `Big Theta` can informally be thought of as something like "***equals***", `Big O` can be thought of as "***less than or equals***".
+- $N^3 + 3N^4 \in \Theta (N^4)$
+- $N^3 + 3N^4 \in O(N^4)$
+- $N^3 + 3N^4 \in O(N^6)$
+- $N^3 + 3N^4 \in O(N!)$
+- $N^3 + 3N^4 \in O(N^{N!})$
+
+Given a code snippet, we can express its runtime as a function $R(N)$, where $N$ is some property of the input of the function (often the size of the input). Rather than finding $R(N)$ exactly, we instead usually only care about the `order of growth` of $R(N)$. One approach:
+- Choose a representative operation and let $C(N)$ be the count of how many times that operation occurs as a function of $N$
+- Determine `order of growth` $f(N)$ of $C(N)$, i.e. $C(N) \in \Theta (f(N))$
+  - *often (but not always) we consider the worst case count*
+- If operation takes constant time, then $R(N) \in \Theta (f(N))$
+- Can use $O$ as an alternative for $\Theta$, $O$ is used for **upper bounds**
+
+
 
 
 
