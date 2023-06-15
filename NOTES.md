@@ -59,6 +59,12 @@ Notes taken when auditing CS 61B, please refer to the original slides and lectur
     - [Worst Case Order of Growth](#worst-case-order-of-growth)
     - [Big Theta](#big-theta)
     - [Big O Notation](#big-o-notation)
+- [Week 6](#week-6)
+  - [Lecture 14: Disjoint Sets](#lecture-14-disjoint-sets)
+    - [Quick Find](#quick-find)
+    - [Quick Union](#quick-union)
+    - [Weighted Quick Union](#weighted-quick-union)
+    - [Path Compression](#path-compression)
 
 </details>
 
@@ -732,7 +738,101 @@ Given a code snippet, we can express its runtime as a function $R(N)$, where $N$
 - If operation takes constant time, then $R(N) \in \Theta (f(N))$
 - Can use $O$ as an alternative for $\Theta$, $O$ is used for **upper bounds**
 
+## Week 6
 
+[`Lab 6`](https://sp21.datastructur.es/materials/lab/lab6/lab6)
+
+### Lecture 14: Disjoint Sets
+
+**Disjoint Sets** data structure has two operations:
+- `connect(x, y)` connects `x` and `y`.
+- `isConnected(x, y)` returns true if `x` and `y` are connected. ***Connections can be transitive***.
+
+Naive approach
+- Connecting two things: Record every single connecting line in some data structure
+- Checking connectedness: Do some sort of iteration over the lines to see if one thing can be reached from the other
+
+Better approach
+- Rather than manually writing out every single connecting line, **only record the sets that each item belong to**.
+- `{0}, {1}, {2}, {3}, {4}, {5}, {6}`
+  - `connect(0, 1) -> {0, 1}, {2}, {3}, {4}, {5}, {6}`
+  - `connect(1, 2) -> {0, 1, 2}, {3}, {4}, {5}, {6}`
+- For each item, its ***connected component*** is the set of all items that are connected to that item.
+
+#### Quick Find
+
+Data structure to support tracking of sets:
+- Idea 1: **List of sets of integers**, `List<Set<Integer>>`
+  - ***Complicated and slow***
+  - Operations are linear when number of connections are small, have to iterate over all sets
+- Idea 2: **List of integers** where `i`th entry gives set number (a.k.a. `id`) of item `i`
+  - `connect(p, q)` changes entries that equal `id[p]` to `id(q)`
+  - Very fast to `isConnected`, relatively slow to `connect`
+
+#### Quick Union
+
+Improving the connect operation - **Assign each item a parent** (instead of an id)
+> *Results in a tree-like shape*
+
+```
+{0, 1, 2, 4}, {3, 5}, {6}
+
+parent[-1, 0, 1, -1, 0, 3, -1]
+        0  1  2   3  4  5   6
+```
+
+`connect(5, 2)` makes `root(5): 3` into a child of `root(2): 0`
+- Performance issue: **Tree can get too tall!** `root(x)` becomes expensive
+
+```
+parent[-1, 0, 1, 0, 0, 3, -1]
+        0  1  2  3  4  5   6
+```
+
+#### Weighted Quick Union
+
+Modify Quick Union to avoid tall trees
+- Track tree size (number of elements)
+- ***Always link root of smaller trees to larger trees***
+
+Performance summary
+
+> *By tweaking Weighted Quick Union we have achieved **logarithmic time performance**.*
+
+| Implementation      | Constructor  | `connect`    | `isConnected` |
+| ------------------- | ------------ | ------------ | ------------- |
+| List of Sets        | $\Theta (N)$ | $O(N)$       | $O(N)$        |
+| Quick Find          | $\Theta (N)$ | $\Theta (N)$ | $\Theta (1)$  |
+| Quick Union         | $\Theta (N)$ | $O(N)$       | $O(N)$        |
+| Weighed Quick Union | $\Theta (N)$ | $O(\log N)$  | $O(\log N)$   |
+
+#### Path Compression
+
+Performing $M$ operations with $N$ elements:
+- For our naive implementation, runtime is $O(MN)$
+- For our best implementation, runtime is $O(N + M \log N)$
+- For $N = M = 10^9$, difference is **30 years** vs. **6 seconds**
+
+Clever idea: When we do `isConnected(15, 10)`, **tie all nodes seen to the root**. *(additional cost is insignificant, same order of growth)*
+- Path compression results in a union/connected operations that are very very close to amortized constant time
+- $M$ operations on $N$ nodes is $O(N + M \lg^* N)$
+- $\lg^*$ is less than 5 for any realistic input
+
+| $N$         | $\lg^* N$ |
+| ----------- | --------- |
+| $1$         | 0         |
+| $2$         | 1         |
+| $4$         | 2         |
+| $16$        | 3         |
+| $65536$     | 4         |
+| $2^{65536}$ | 5         |
+
+The ideas that made our implementation efficient:
+- `ListOfSetsDS`: Store connected components as a list of sets *(slow, complicated)*
+- `QuickFindDS`: Store connected components as set ids
+- `QuickUnionDS`: Store connected components as **parent ids**
+  - `WeightedQuickUnionDS`: Also track the size of each set, and **use size to decide on new tree root**
+    - `WeightedQuickUnionWithPathCompressionDS`: On calls to connect and isConnected, ***set parent id to the root for all items seen***
 
 
 
