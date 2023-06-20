@@ -190,18 +190,32 @@ class Utils {
 
     /* OTHER FILE UTILITIES */
 
-    /** Return the concatentation of FIRST and OTHERS into a File designator,
+    /** Return the concatenation of FIRST and OTHERS into a File designator,
      *  analogous to the {@link java.nio.file.Paths.#get(String, String[])}
      *  method. */
     static File join(String first, String... others) {
         return Paths.get(first, others).toFile();
     }
 
-    /** Return the concatentation of FIRST and OTHERS into a File designator,
+    /** Return the concatenation of FIRST and OTHERS into a File designator,
      *  analogous to the {@link java.nio.file.Paths.#get(String, String[])}
      *  method. */
     static File join(File first, String... others) {
         return Paths.get(first.getPath(), others).toFile();
+    }
+
+    /** Return the concatenation of FIRST and OTHERS into a File designator,
+     *  analogous to the {@link java.nio.file.Paths.#get(String, String[])}
+     *  method. */
+    static File join(String first, File others) {
+        return Paths.get(first, others.getPath()).toFile();
+    }
+
+    /** Return the concatenation of FIRST and OTHERS into a File designator,
+     *  analogous to the {@link java.nio.file.Paths.#get(String, String[])}
+     *  method. */
+    static File join(File first, File others) {
+        return Paths.get(first.getPath(), others.getPath()).toFile();
     }
 
 
@@ -236,4 +250,14 @@ class Utils {
         System.out.printf(msg, args);
         System.out.println();
     }
+
+    /** Print a message and exit with code 0.
+     *
+     * @author Yuhan Zhang
+     */
+    static void exit(String msg) {
+        System.out.println(msg);
+        System.exit(0);
+    }
+
 }
