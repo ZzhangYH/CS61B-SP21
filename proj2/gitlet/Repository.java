@@ -6,17 +6,6 @@ import static gitlet.Utils.*;
 
 /** Represents a gitlet repository.
  *
- *  Structure of the directory:
- *  .gitlet/
- *    - objects/
- *    - refs/
- *      - heads/
- *    - logs/
- *      - refs/
- *        - heads/
- *    - index
- *    - HEAD
- *
  *  @author Yuhan Zhang
  */
 public class Repository {
@@ -71,7 +60,7 @@ public class Repository {
     /** Starting at the current head commit, display each commit backwards until the initial commit. */
     public static void log() {
         Branch b = readObject(HEAD, Branch.class);
-        System.out.print(readContentsAsString(b.getLogPath()));
+        System.out.print(readContentsAsString(b.getLogFile()));
     }
 
 }

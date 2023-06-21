@@ -11,8 +11,6 @@ import static gitlet.Utils.*;
 import static gitlet.Repository.*;
 
 /** Represents a gitlet commit object.
- *  TODO: It's a good idea to give a description here of what else this Class
- *  does at a high level.
  *
  *  @author Yuhan Zhang
  */
@@ -53,8 +51,8 @@ public class Commit implements Serializable {
         }
         Branch b = readObject(HEAD, Branch.class);
         b.setCommit(this);
-        writeContents(b.getLogPath(), this.toString() +
-                readContentsAsString(b.getLogPath()));
+        writeContents(b.getLogFile(), this.toString() +
+                readContentsAsString(b.getLogFile()));
     }
 
     /** Return the relative path of the commit. */
