@@ -52,7 +52,7 @@ public class Commit implements Serializable {
             throw new RuntimeException(e);
         }
         Branch b = readObject(HEAD, Branch.class);
-        writeObject(b.getRefPath(), this);
+        b.setCommit(this);
         writeContents(b.getLogPath(), this.toString() +
                 readContentsAsString(b.getLogPath()));
     }

@@ -52,4 +52,15 @@ public class Branch implements Serializable {
         return join(LOGS_DIR, this.path);
     }
 
+    /** Return the latest commit of the branch. */
+    public Commit getCommit() {
+        return this.commit;
+    }
+
+    /** Update the branch with the latest commit and save it. */
+    public void setCommit(Commit commit) {
+        this.commit = commit;
+        writeObject(this.getRefPath(), this);
+    }
+
 }
