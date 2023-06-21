@@ -20,13 +20,6 @@ import static gitlet.Utils.*;
  *  @author Yuhan Zhang
  */
 public class Repository {
-    /**
-     * TODO: add instance variables here.
-     *
-     * List all instance variables of the Repository class here with a useful
-     * comment above them describing what that variable represents and how that
-     * variable is used. We've provided two examples for you.
-     */
 
     /* Directories */
 
@@ -73,6 +66,12 @@ public class Repository {
         // Create initial commit.
         Commit init = new Commit();
         init.commit();
+    }
+
+    /** Starting at the current head commit, display each commit backwards until the initial commit. */
+    public static void log() {
+        Branch b = readObject(HEAD, Branch.class);
+        System.out.print(readContentsAsString(b.getLogPath()));
     }
 
 }

@@ -8,12 +8,17 @@ import static gitlet.Utils.*;
 public class Main {
 
     /** Usage: java gitlet.Main ARGS, where ARGS contains
-     *
      *  <COMMAND> <OPERAND1> <OPERAND2> ...
+     *
      *  init -- Creates a new Gitlet version-control system in the current directory.
      *          This system will automatically start with one initial commit.
      *          It will have a single branch: master, which initially points to this initial commit,
      *          and master will be the current branch.
+     *
+     *  log -- Starting at the current head commit, display information about each commit
+     *         backwards along the commit tree until the initial commit,
+     *         following the first parent commit links, ignoring any second parents
+     *         found in merge commits.
      *
      */
     public static void main(String[] args) {
@@ -31,7 +36,10 @@ public class Main {
             case "add":
                 // TODO: handle the `add [filename]` command
                 break;
-            // TODO: FILL THE REST IN
+            case "log":
+                validate(args, 1);
+                Repository.log();
+                break;
             default:
                 exit("No command with that name exists.");
         }
