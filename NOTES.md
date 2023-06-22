@@ -65,6 +65,11 @@ Notes taken when auditing CS 61B, please refer to the original slides and lectur
     - [Quick Union](#quick-union)
     - [Weighted Quick Union](#weighted-quick-union)
     - [Path Compression](#path-compression)
+  - [Lecture 15: Asymptotics II](#lecture-15-asymptotics-ii)
+  - [Lecture 16: ADTs, Sets, Maps, and BSTs](#lecture-16-adts-sets-maps-and-bsts)
+    - [Abstract Data Types](#abstract-data-types)
+    - [BST Definitions](#bst-definitions)
+    - [BST Operations](#bst-operations)
 
 </details>
 
@@ -633,6 +638,8 @@ The `toString()` method provides a string representation of an object
 
 ### Lecture 12: Command Line Programming, Git, and Project 2 Preview
 
+Live lecture demo, see video [here](https://youtu.be/fvhqn5PeU_Q).
+
 ### Lecture 13: Asymptotics I
 
 #### Intuitive Runtime Characterizations
@@ -648,7 +655,9 @@ public static boolean dup1(int[] A) {
     }
     return false;
 }
+```
 
+```java
 public static boolean dup2(int[] A) {
     for (int i = 0; i < A.length - 1; i += 1) {
         if (A[i] == A[i + 1]) { 
@@ -833,6 +842,87 @@ The ideas that made our implementation efficient:
 - `QuickUnionDS`: Store connected components as **parent ids**
   - `WeightedQuickUnionDS`: Also track the size of each set, and **use size to decide on new tree root**
     - `WeightedQuickUnionWithPathCompressionDS`: On calls to connect and isConnected, ***set parent id to the root for all items seen***
+
+### Lecture 15: Asymptotics II
+
+Analysis of algorithms on `For Loops`, `Recurrence`, `Binary Search`, and `Merge Sort`.
+
+Live examples, see video [here](https://www.youtube.com/playlist?list=PL8FaHk7qbOD5Ek10eT39UqAjcwr99xqZP).
+
+### Lecture 16: ADTs, Sets, Maps, and BSTs
+
+#### Abstract Data Types
+
+> *An **Abstract Data Type** is defined only by its operations, not by its implementation.*
+
+```mermaid
+graph TD;
+  l1[[List]]
+  l1 --- l2[LinkedList]
+  l1 --- l3[ArrayList]
+```
+
+In Java, there is syntax differentiation between `ADT` and `Implementation` (`Interface` *in Java isn't purely abstract as they can obtain some implementation details, e.g.* `default` *methods*).
+
+```java
+List<Integer> L = new ArrayList<>(); // While List is abstract, ArrayList is concrete.
+```
+
+Among the most important interfaces in the `java.util` library are those that extend the `Collection` interface
+- `List` Lists of things
+- `Set` Sets of things
+- `Map` Mappings between items
+
+#### BST Definitions
+
+A **tree** consists of
+- A set of nodes
+- A set of edges that connect those nodes
+- *Constraint*: There is ***exactly one path*** between any two nodes.
+
+> *A **Binary Search Tree** is a rooted binary tree with the* `BST` *property.*
+
+For every node `X` in the tree:
+- Every key in the **left** subtree is **less** than `X`'s key.
+- Every key in the **right** subtree is **greater** than `X`'s key.
+
+Ordering must be *complete*, *transitive*, and *antisymmetric*. Given keys $p$ and $q$:
+- ***Exactly one*** of $p \prec q$ and $q \prec p$ is true
+- $(p \prec q) \wedge (q \prec r) \implies p \prec r$
+- *No duplicate keys are allowed!*
+
+#### BST Operations
+
+**BST Operation** `search`
+
+If `searchKey` $\sim$ `T.key`, return
+- If `searchKey` $\prec$ `T.key`, search `T.left`
+- If `searchKey` $\succ$ `T.key`, search `T.right`
+
+The runtime to complete a search on a "bushy" `BST` in the worst case is $\Theta (\log N)$ since the height of the tree is $\sim \log_2 N$, where $N$ is the number of nodes.
+- It is really fast
+- At $1$ microsecond per operation, it can find something from a tree of size $10^{300000}$ in one second
+
+**BST Operation** `insert`
+
+Search for key:
+- If found, do nothing
+- If not found
+  - Create a new node
+  - Set appropriate link
+
+**BST Operation** `delete`
+
+- Deletion key has no children
+  - Sever the parent's link
+  - Garbage collection
+- Deletion key has one child
+  - Move parent's pointer to the child
+  - Garbage collection
+- Deletion key has two children *(Hibbard Deletion)*
+  - Find new node to replace it
+  - Must be $\prec$ than everything in the **left** subtree
+  - Must be $\succ$ than everything in the **right** subtree
 
 
 
