@@ -1,12 +1,16 @@
 # CS 61B. Data Structures, Spring 2021
 
-Great thanks to [Josh Hug](https://www2.eecs.berkeley.edu/Faculty/Homepages/joshhug.html) and [UC Berkeley](https://www.berkeley.edu) for offering such a great course. The [skeleton](https://github.com/Berkeley-CS61B/skeleton-sp21), [library](https://github.com/Berkeley-CS61B/library-sp21), and [lecture code](https://github.com/Berkeley-CS61B/lectureCode-sp21) in this repository was written by [CS 61B Staff](https://github.com/Berkeley-CS61B) and modified by me for exercises.
+Great thanks to [Professor Josh Hug](https://www2.eecs.berkeley.edu/Faculty/Homepages/joshhug.html) and [UC Berkeley](https://www.berkeley.edu) for offering such a great course. The [skeleton](https://github.com/Berkeley-CS61B/skeleton-sp21), [library](https://github.com/Berkeley-CS61B/library-sp21), and [lecture code](https://github.com/Berkeley-CS61B/lectureCode-sp21) in this repository were originally written by [CS 61B Staff](https://github.com/Berkeley-CS61B) and modified for my exercise needs. Along with the [course website](https://sp21.datastructur.es), here are also some additional learning resources:
 
-This is my self-learning notes when auditing CS 61B @ Summer 2023 -> [`NOTES.md`](/NOTES.md).
+- Professor Hilfinger's Books
+  - [*A Java Reference: Assorted Java Reference Material*](http://www-inst.eecs.berkeley.edu/~cs61b/fa14/book1/java.pdf)
+  - [*Data Structures (Into Java)*](http://www-inst.eecs.berkeley.edu/~cs61b/fa14/book2/data-structures.pdf)
+- [Hug61B](https://joshhug.gitbooks.io/hug61b/content) - GitBook companion to Hug's version of CS61B
+- My lecture notes when auditing CS61B @ Summer 2023, see [NOTES.md](/NOTES.md)
 
 ## Projects Overview
 
-List of projects for the course and my stats:
+List of projects in the course and my stats:
 
 | Projects                                                                              | Start Date | End Date | Autograder Mark           |
 | ------------------------------------------------------------------------------------- | ---------- | -------- | ------------------------- |
