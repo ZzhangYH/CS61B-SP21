@@ -1,0 +1,11 @@
+                # of strings        ULLMap      BSTMap      TreeMap     HashMap
+Random:         1000                0.01        0.00        0.00        0.00
+                10000               0.55        0.01        0.01        0.00
+                50000               12.99       0.04        0.03        0.02
+
+In Order:       1000                0.02        0.02        0.00        0.00
+                10000               0.88        0.78        0.01        0.00
+                50000               19.16       10.90       0.03        0.02
+
+The performance ranking is: (worst) ULLMap > BSTMap > TreeMap > HashMap (best),
+especially in lexicographically-increasing order where trees get extremely large, the difference is much more obvious.
