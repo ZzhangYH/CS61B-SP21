@@ -1,6 +1,6 @@
-# CS61B-sp21 Lecture Notes
+# CS61B-SP21 Lecture Notes
 
-Notes taken when auditing CS 61B, please refer to the original slides and lecture videos on [course homepage](https://sp21.datastructur.es) created by Josh and lovely CS 61B Staff team.
+Notes taken when auditing CS 61B, please refer to the original slides and lecture videos on [course homepage](https://sp21.datastructur.es) created by Josh Hug and lovely CS 61B Staff team.
 
 <details>
   <summary><b>Table of Contents</b></summary>
