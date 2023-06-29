@@ -70,6 +70,12 @@ Notes taken when auditing CS 61B, please refer to the original slides and lectur
     - [Abstract Data Types](#abstract-data-types)
     - [BST Definitions](#bst-definitions)
     - [BST Operations](#bst-operations)
+- [Week 7](#week-7)
+  - [Lecture 17: B-Trees](#lecture-17-b-trees)
+    - [BST Tree Height](#bst-tree-height)
+    - [Height, Depth, and Performance](#height-depth-and-performance)
+    - [B-Trees, 2-3 Trees, 2-3-4 Trees](#b-trees-2-3-trees-2-3-4-trees)
+    - [B-Tree Invariants and runtime analysis](#b-tree-invariants-and-runtime-analysis)
 
 </details>
 
@@ -265,7 +271,7 @@ Invariants make it easier to reason about code
 
 ## Week 3
 
-[`Lab 3`](https://sp21.datastructur.es/materials/lab/lab3/lab3)
+[`Lab3`](https://sp21.datastructur.es/materials/lab/lab3/lab3)
 
 ### Lecture 6: DLLists and Arrays
 
@@ -749,7 +755,7 @@ Given a code snippet, we can express its runtime as a function $R(N)$, where $N$
 
 ## Week 6
 
-[`Lab 6`](https://sp21.datastructur.es/materials/lab/lab6/lab6)
+[`Lab6`](https://sp21.datastructur.es/materials/lab/lab6/lab6)
 
 ### Lecture 14: Disjoint Sets
 
@@ -924,6 +930,80 @@ Search for key:
   - Must be $\prec$ than everything in the **left** subtree
   - Must be $\succ$ than everything in the **right** subtree
 
+## Week 7
+
+[`Lab7`](https://sp21.datastructur.es/materials/lab/lab7/lab7) [`HW2`](https://sp21.datastructur.es/materials/hw/hw2/hw2.pdf)
+
+### Lecture 17: B-Trees
+
+#### BST Tree Height
+
+|             | Bushy Tree                   | Spindly Tree                    |
+| ----------- | ---------------------------- | ------------------------------- |
+| Description | Two children each node leafy | One children each node linearly |
+| Performance | $\Theta (\log N)$            | $\Theta (N)$                    |
+
+BST height is all four of these:
+- $\Theta (\log N)$ in the best case (bushy) - ***Informative***
+- $\Theta (N)$ in the worst case (spindly) - ***Informative***
+- $O(N)$
+- $O(N^2)$
+
+The usefulness of **Big O**
+- Allows us to make simple blank statements
+  - *Binary search is* $O(\log N)$
+  - *Binary search is* $\Theta (\log N)$ *in the worst case*
+- Sometime don't know the exact runtime, so use O to give an upper bound
+- Easier to write proofs for Big O than Big Theta
+
+#### Height, Depth, and Performance
+
+- The `depth` **of a node** is how far it is from the root.
+- The `height` **of a tree** is the depth of its deepest leaf.
+  - *Determines the worst case runtime to find a node*
+- The `average depth` of a tree is the average depth of a tree's nodes.
+  - *Determines the average case runtime to find a node*
+
+In real world applications we expect both insertion and deletion, random trees simulation including insertion and deletion show that they are still $\Theta (\log N)$ height! **Random trees are bushy**; however, we can't always insert out items in order - ***data comes in over time, we don't have them in advance***.
+
+#### B-Trees, 2-3 Trees, 2-3-4 Trees
+
+Avoid new leaves by *overstuffing* the leaf nodes
+- Adding new leaves at the bottom
+- Overstuffed trees always have balanced height, because leaf depths never change
+- Height is just `max(depth)`
+
+Height is balanced, but leaf nodes can get juicy
+- Set limit $L$ on the number of items
+- If any node has more than $L$ items, give an item (maybe arbitrarily left-middle) to its parent
+  - Pulling item out of full node splits it into left and right
+  - Parent node now has three children
+- Examining a node casts $O(L)$ compares, but that's OK since $L$ is constant
+
+Real name for splitting trees is **B Trees**
+- B-trees of order $L = 2$ are also called 2-3 trees
+- B-trees of order $L = 3$ are also called 2-3-4 or 2-4 trees
+- **Small** $L$ is used as a conceptually simple balanced search tree
+- **Large** $L$ is used in practice for databases and file systems
+
+> *The origin of "B-tree" has never been explained by the authors. As we shall see, "**balanced**", "**broad**", or "**bushy**" might apply. \
+> Others suggest that the "B" stands for Boeing. Because of his contributions, however, it seems appropriate to think of B-trees as "Bayer"-trees.* 
+
+#### B-Tree Invariants and runtime analysis
+
+B-Tree Bushiness Invariants
+- ***All leaves must be the same distance from source***
+- A non-leaf node with `k` items must have exactly `k+1` children
+
+Height of a B-Tree with limit $L$
+- Largest possible height is all non-leaf nodes have 1 item -> $\sim \log_{2}(N)$
+- Smallest possible height is all nodes have $L$ items -> $\sim \log_{L+1}(N)$
+- Overall height is therefore $\Theta (\log N)$
+
+Runtime for `contains` and `add`
+- Worst case number of nodes to inspect: $H + 1$
+- Worst case number of items to inspect per node: $L$
+- Overall runtime: $O(HL)$, since $H = \Theta (\log N)$, overall runtime is $O(L \log N)$
 
 
 
