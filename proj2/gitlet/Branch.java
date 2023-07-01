@@ -7,8 +7,8 @@ import java.io.Serializable;
 import static gitlet.Utils.*;
 import static gitlet.Repository.*;
 
-/** Represents a gitlet branch object.
- *
+/**
+ * Represents a gitlet branch object.
  * @author Yuhan Zhang
  */
 public class Branch implements Serializable {
@@ -36,6 +36,13 @@ public class Branch implements Serializable {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        writeObject(this.getRefFile(), this);
+    }
+
+    /** Update the branch with the latest commit and save it. */
+    public void setCommit(Commit commit) {
+        this.commit = commit;
+        writeObject(this.getRefFile(), this);
     }
 
     /** Return the name of the branch. */
@@ -61,12 +68,6 @@ public class Branch implements Serializable {
     /** Return the latest commit of the branch. */
     public Commit getCommit() {
         return this.commit;
-    }
-
-    /** Update the branch with the latest commit and save it. */
-    public void setCommit(Commit commit) {
-        this.commit = commit;
-        writeObject(this.getRefFile(), this);
     }
 
 }

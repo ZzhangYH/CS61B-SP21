@@ -4,9 +4,9 @@ import java.io.File;
 
 import static gitlet.Utils.*;
 
-/** Represents a gitlet repository.
- *
- *  @author Yuhan Zhang
+/**
+ * Represents a gitlet repository.
+ * @author Yuhan Zhang
  */
 public class Repository {
 
@@ -50,17 +50,40 @@ public class Repository {
 
         // Create default branch.
         Branch master = new Branch("master");
-        writeObject(HEAD, master);
+        writeContents(HEAD, master.getPath().toString());
+        writeObject(INDEX, new Index());
 
         // Create initial commit.
         Commit init = new Commit();
         init.commit();
     }
 
+    /** Adds a copy of the file as it currently exists to the staging area. */
+    public static void addFile(String fileName) {
+        // File does not exist.
+        File file = join(CWD, fileName);
+        if (!file.exists()) {
+            exit("File does not exist.");
+        }
+        Index idx = readObject(INDEX, Index.class);
+        idx.add(fileName, file);
+    }
+
     /** Starting at the current head commit, display each commit backwards until the initial commit. */
     public static void log() {
-        Branch b = readObject(HEAD, Branch.class);
+        Branch b = readObject(getCurrentBranch(), Branch.class);
         System.out.print(readContentsAsString(b.getLogFile()));
+    }
+
+    /** Displays what branches currently exist, (marking the current branch with a *) and
+     *  what files have been staged for addition or removal. */
+    public static void status() {
+        System.out.print(readObject(INDEX, Index.class).toString());
+    }
+
+    /** Returns the object of the current working branch. */
+    public static File getCurrentBranch() {
+        return join(GITLET_DIR, readContentsAsString(HEAD));
     }
 
 }

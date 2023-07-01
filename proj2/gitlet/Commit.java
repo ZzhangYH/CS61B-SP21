@@ -5,14 +5,15 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
 
 import static gitlet.Utils.*;
 import static gitlet.Repository.*;
 
-/** Represents a gitlet commit object.
- *
- *  @author Yuhan Zhang
+/**
+ * Represents a gitlet commit object.
+ * @author Yuhan Zhang
  */
 public class Commit implements Serializable {
 
@@ -24,12 +25,15 @@ public class Commit implements Serializable {
     private final Date date;
     /** Parent of this commit. */
     private Commit parent;
+    /** Map of file tracked by this commit. */
+    private HashMap<File, Blob> blobs;
 
     /** Default constructor, initializes the very first commit of the repo. */
     public Commit() {
         this.message = "initial commit";
         this.date = new Date(0);
         this.parent = null;
+        this.blobs = new HashMap<File, Blob>();
         this.UID = sha1(null + message + date);
     }
 
@@ -37,7 +41,8 @@ public class Commit implements Serializable {
     public Commit(String message, Commit parent) {
         this.message = message;
         this.date = new Date();
-        this.parent = parent;
+        this.parent = readObject(getCurrentBranch(), Branch.class).getCommit();
+        this.blobs = new HashMap<File, Blob>();
         this.UID = sha1(parent + message + date);
     }
 
@@ -49,7 +54,7 @@ public class Commit implements Serializable {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        Branch b = readObject(HEAD, Branch.class);
+        Branch b = readObject(getCurrentBranch(), Branch.class);
         b.setCommit(this);
         writeContents(b.getLogFile(), this.toString() +
                 readContentsAsString(b.getLogFile()));
@@ -58,6 +63,11 @@ public class Commit implements Serializable {
     /** Return the relative path of the commit. */
     public File getPath() {
         return join(LOGS_DIR, this.UID);
+    }
+
+    /** Returns the Blob of the file specified. */
+    public Blob getBlob(File file) {
+        return blobs.get(file);
     }
 
     /** Return the commit as a log of String. */
