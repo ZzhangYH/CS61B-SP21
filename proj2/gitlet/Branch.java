@@ -17,10 +17,6 @@ public class Branch implements Serializable {
     private final String name;
     /** Relative path to this branch. */
     private final File path;
-    /** Absolute path to the ref file of this branch. */
-    private final File refFile;
-    /** Absolute path to the log file of this branch. */
-    private final File logFile;
     /** Latest commit of this branch. */
     private Commit commit;
 
@@ -28,11 +24,9 @@ public class Branch implements Serializable {
     public Branch(String name) {
         this.name = name;
         this.path = join("refs", "heads", this.name);
-        this.refFile = join(GITLET_DIR, this.path);
-        this.logFile = join(LOGS_DIR, this.path);
         try {
-            this.refFile.createNewFile();
-            this.logFile.createNewFile();
+            this.getRefFile().createNewFile();
+            this.getLogFile().createNewFile();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -57,12 +51,12 @@ public class Branch implements Serializable {
 
     /** Return the absolute path to the refs. */
     public File getRefFile() {
-        return this.refFile;
+        return join(GITLET_DIR, this.path);
     }
 
     /** Return the absolute path to the logs. */
     public File getLogFile() {
-        return this.logFile;
+        return join(LOGS_DIR, this.path);
     }
 
     /** Return the latest commit of the branch. */

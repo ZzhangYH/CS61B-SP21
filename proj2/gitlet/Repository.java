@@ -69,6 +69,16 @@ public class Repository {
         idx.add(fileName, file);
     }
 
+    /** Adds a copy of the file as it currently exists to the staging area. */
+    public static void commit(String message) {
+        // Commit must have a non-blank message.
+        if (message.length() == 0) {
+            exit("Please enter a commit message.");
+        }
+        Commit c = new Commit(message);
+        c.commit();
+    }
+
     /** Starting at the current head commit, display each commit backwards until the initial commit. */
     public static void log() {
         Branch b = readObject(getCurrentBranch(), Branch.class);
