@@ -39,7 +39,7 @@ public class Commit implements Serializable {
         this.message = message;
         this.date = new Date();
         this.parent = readObject(getCurrentBranch(), Branch.class).getCommit();
-        this.blobs = this.parent.getBlobs();
+        this.blobs.putAll(this.parent.getBlobs());
     }
 
     /** Commit and write to the logs. */
