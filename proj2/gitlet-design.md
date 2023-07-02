@@ -22,9 +22,21 @@ Refer to the internal structure of `.gitlet` directory at the [Persistence](#per
 4. `public static final File REFS_DIR = join(GITLET_DIR, "refs")` The directory holding all references to branches related files.
 5. `public static final File LOGS_DIR = join(GITLET_DIR, "logs")` The directory holding the commit logs based on the structure of branches and commit related files.
 6. `public static final File HEAD = join(GITLET_DIR, "HEAD")` File under our repository root directory, contains the relative path to the current working branch `refs/heads/<branch-name>`.
-7. `public static final File INDEX = join(GITLET_DIR, "index")` Not implemented yet.
+7. `public static final File INDEX = join(GITLET_DIR, "index")` File under our repository root directory, which is the staging area, holds the `Index` object.
 
 Everything within this class shall be `static` since there is no need to instantiate a `Repository` object, and we can directly call and refer to its variables and methods.
+
+### Index
+
+This is the staging area of the gitlet repository. It holds `maps` of **staged**, **tracked**, and **removed** *files to their blob contents* where the `add`, `rm`, `commits`, `status` commands refer. The `Index` object is stored in `index` file under the root directory and will be updated promptly after change(s) are made.
+
+#### Fields
+
+1. `private HashMap<File, Blob> staged` Map of the files staged.
+2. `private HashMap<File, Blob> tracked` Map of the files tracked.
+3. `private HashMap<File, Blob> removed` Map of the files removed.
+
+`Default Constructor` Initializes the `staged`, `tracked`, and `removed` maps.
 
 ### Branch
 
@@ -36,28 +48,41 @@ This class represents a `Branch` in our gitlet repository. Each branch has a `na
 
 1. `private final String name`: Name of the branch.
 2. `private final File path`: **Relative** path of the branch.
-3. `private final File refFile`: **Absolute** path to the ref file of the branch.
-4. `private final File logFile`: **Absolute** path to the log file of the branch.
-5. `private Commit commit`: Latest commit of the branch.
+3. `private Commit commit`: Latest commit of the branch.
 
-`Constructor`: Sets the **name** and **path** of the branch, creates the corresponding files, and sets the latest commit according to `.gitlet/HEAD` *if applicable*.
+`Constructor` Sets the **name** and **path** of the branch, creates the corresponding files, and sets the latest commit according to `.gitlet/HEAD` *if applicable*.
 
 ### Commit
 
 This class represents a `Commit` in our gitlet repository. Each commit is **identified by its SHA-1 id**, which includes the *essential composition of a commit*: file references of its files, parent reference, log message, and commit time.
 
-`Commit` objects are stored under `.gitlet/logs/<commit-uid>`. Its relative files are created and written when actually committing the commits by calling `public void commit()`.
+`Commit` objects are stored under `.gitlet/objects/<commit-uid>`. Its relative files are created and written when actually committing the commits by calling `public void commit()`.
 
 #### Fields
 
-1. `UID [Final]`: 40-character SHA-1 id of the commit.
-2. `message [Final]`: Message of the commit.
-3. `date [Final]`: Timestamp of the commit.
-4. `parent`: Not implemented yet.
+1. `private final String message` Message of the commit.
+2. `private final Date date` Timestamp of the commit.
+3. `private Commit parent` Not implemented yet.
+4. `private HashMap<File, Blob> blobs` Map of file to the Blob contents of the commit
+5. `private String UID` 40-character SHA-1 id of the commit.
 
-`Default Constructor`: Sets the ***initial commit*** with **message** `initial commit`, **timestamp** of `00:00:00 UTC, Thursday, 1 January 1970`, **parent** of `null`, and finally generates the `UID`.
+`Default Constructor`: Sets the ***initial commit*** with **message** `initial commit`, **timestamp** of `00:00:00 UTC, Thursday, 1 January 1970`, **parent** of `null`, and **empty blobs**.
 
-`Constructor`: Sets the **message**, **time**, and **parent** using the parameters, and generates the `UID`.
+`Constructor` Sets the **message**, **time**, **parent** which *is the last commit*, and copies all blobs from the parent.
+
+### Blob
+
+A blob holds the detailed information of a file in the repository. It helps commits to keep track of **different** and **various versions** of files, which is *core of our version control system*. Mostly a `Blob` will be stored in form of `HashMap<File, Blob>` where the path to the file will be the key, lying under the staging area and tracked by all commits.
+
+#### Fields
+
+1. `private final String name` Name of this blob, relative path to the `CWD`.
+2. `private final File path` Absolute path to the file of this blob.
+3. `private final byte[] contents` Contents in the file of this blob.
+
+`Constructor` Sets the **name** and **path** of the blob taken from the parameter and **reads the file contents**.
+
+All instance variables are all `final` because once the `Blob` is generated there won't be changes to it. ***Any modifications*** to the file contents will generate a **new** `Blob` to be tracked.
 
 ## Algorithms
 
@@ -74,15 +99,28 @@ The `init` command starts by attempting to set up the persistence of the reposit
 
 Then the system will create a default branch `master` in the repository, and commit an `initial commit` with no files into the new `master` branch.
 
+### add
+
+`add` command takes a `file name` as the second command line argument, adding a copy of the file as it currently exists to the staging area. **If the file does not exist**, print the error message `File does not exist.` and exit without changing anything. Firstly, the program checks *whether the current working version of the file is **identical to that in the last commit***, if true it will not be staged and will be removed it if it is already there. When the file is **eligible to be added**, it will be passed to `staged` and `tracked` area so that the `Index` object will be updated and saved accordingly.
+
 ### commit
 
-**Not fully implemented yet.**
+The command starts by checking
 
-When committing a `commit` by calling `public void commit()`, the program will create the file holding the `commit` object, find the current working branch with `.gitlet/HEAD`, update the commit into it, and append the commit details to the `log` file of the branch.
+- **If no files have been staged for commit**, abort and print `No changes added to the commit.`
+- **If the commit have a non-blank message**, abort and print `Please enter a commit message.`
+
+When committing a `commit` by calling `public void commit()`, the program will create the file holding the `commit` object, generate the **SHA-1** `UID` according to *file references*, *parent reference*, *log message*, and *commit time*, and **clear the staging area**. Then, the program saves this `commit` under `.gitlet/objects` identified by its `UID`, finds the current working branch with `.gitlet/HEAD`, updates the commit into it, and appends the commit details to the `log` file of the branch.
+
+> *Not finished yet, lots more commands to integrate.*
 
 ### log
 
 The `log` command displays information about each commit, starting at the current head commit, **backwards along the commit tree** until the `initial commit`, following the first parent commit links, ignoring any second parents found in merge commits. Since each commit writes to the `log` file of the working branch, the program just finds the current working branch with `.gitlet/HEAD` and prints out everything written in it.
+
+### status
+
+`status` command displays **what branches currently exist**, and marks the current branch with a `*`. It also displays **what files have been staged for *addition* or *removal***. The message to be printed of the repository can be accessed by `Index.toString()` method which reads and formats all information needed and listed in *lexicographic order*, using Java string-comparison.
 
 ## Persistence
 
@@ -90,18 +128,18 @@ Structure of the `.gitlet` repository *(temporarily built until now)*:
 
 ```
 .gitlet/
-├── objects/  # Not implemented yet
+├── objects/
+|   ├── <commit-uid>           # Commit object
+|   └── ...
 ├── refs/
 |   └── heads/
 |       ├── <branch-name>      # Branch object
 |       └── ...
 ├── logs/
-|   ├── refs/
-|   |   └── heads/
-|   |       ├── <branch-name>  # Full commit logs of that branch
-|   |       └── ...
-|   ├── <commit-uid>           # Commit object
-|   └── ...
-├── index     # Not implemented yet
+|   └── refs/
+|       └── heads/
+|           ├── <branch-name>  # Full commit logs of that branch
+|           └── ...
+├── index     # Staging area, holds the Index object
 └── HEAD      # Path to the current branch - refs/heads/<branch-name>
 ```
