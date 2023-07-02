@@ -16,11 +16,11 @@ import static gitlet.Repository.*;
 public class Index implements Serializable {
 
     /** Map of the files staged. */
-    private HashMap<File, Blob> staged;
+    private final HashMap<File, Blob> staged;
     /** Map of the files tracked. */
-    private HashMap<File, Blob> tracked;
+    private final HashMap<File, Blob> tracked;
     /** Map of the files removed. */
-    private HashMap<File, Blob> removed;
+    private final HashMap<File, Blob> removed;
 
     /** Default constructor, initialize the instance variables. */
     public Index() {
@@ -36,8 +36,8 @@ public class Index implements Serializable {
 
     /** Clears the staging area. */
     public void clear() {
-        staged = new HashMap<File, Blob>();
-        removed = new HashMap<File, Blob>();
+        staged.clear();
+        removed.clear();
         save();
     }
 
@@ -55,7 +55,7 @@ public class Index implements Serializable {
 
     /** Checks whether the specified file is modified under that in the last commit. */
     public boolean isModified(File file) {
-        Blob b = readObject(getCurrentBranch(), Branch.class).getCommit().getBlob(file);
+        Blob b = getCurrentCommit().getBlob(file);
         if (b == null) {
             return true;
         }
@@ -67,6 +67,16 @@ public class Index implements Serializable {
     /** Returns the map of the staged blobs. */
     public HashMap<File, Blob> getStaged() {
         return this.staged;
+    }
+
+    /** Returns the map of the tracked blobs. */
+    public HashMap<File, Blob> getTracked() {
+        return this.tracked;
+    }
+
+    /** Returns the map of the removed blobs. */
+    public HashMap<File, Blob> getRemoved() {
+        return this.removed;
     }
 
     /** Converts the map of the files into arrays in lexicographic order. */
@@ -87,7 +97,7 @@ public class Index implements Serializable {
         StringBuilder status = new StringBuilder();
 
         status.append("=== Branches ===\n");
-        String current = readObject(getCurrentBranch(), Branch.class).getName();
+        String current = getCurrentBranch().getName();
         List<String> all = plainFilenamesIn(join(REFS_DIR, "heads"));
         for (String b : all) {
             if (b.equals(current)) {

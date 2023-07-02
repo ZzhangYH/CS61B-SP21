@@ -37,6 +37,26 @@ public class Main {
      *      backwards along the commit tree until the initial commit, following the first parent
      *      commit links, ignoring any second parents found in merge commits.
      *
+     *  status --
+     *      Displays what branches currently exist, and marks the current branch with a *. Also
+     *      displays what files have been staged for addition or removal. Entries should be listed
+     *      in lexicographic order, using the Java string-comparison order.
+     *
+     *  checkout --
+     *      -- <file name>
+     *          Takes the version of the file as it exists in the head commit and puts it in the
+     *          working directory, overwriting the version of the file that’s already there.
+     *          The new version of the file is not staged.
+     *      <commit id> -- <file name>
+     *          Takes the version of the file as it exists in the commit with the given id, and
+     *          puts it in the working directory, overwriting the version of the file that’s
+     *          already there. The new version of the file is not staged.
+     *      <branch name>
+     *          Takes all files in the commit at the head of the given branch, and puts them in the
+     *          working directory, overwriting the versions of the files that are already there
+     *          if they exist. Also, at the end of this command, the given branch will now be
+     *          considered the current branch.
+     *
      */
     public static void main(String[] args) {
         // No input arguments.
@@ -45,7 +65,7 @@ public class Main {
         }
 
         String cmd = args[0];
-        switch(cmd) {
+        switch (cmd) {
             case "init":
                 Repository.initialize();
                 validate(args, 1);
@@ -66,6 +86,9 @@ public class Main {
                 validate(args, 1);
                 Repository.status();
                 break;
+            case "checkout":
+                checkout(args);
+                break;
             default:
                 exit("No command with that name exists.");
         }
@@ -79,6 +102,19 @@ public class Main {
         }
         // Check the number of args.
         if (args.length != n) {
+            exit("Incorrect operands.");
+        }
+    }
+
+    /** Checker for the checkout command. */
+    private static void checkout(String[] args) {
+        if (args.length == 2) {
+            Repository.checkoutBranch(args[1]);
+        } else if (args.length == 3 && args[1].equals("--")) {
+            Repository.checkoutFile(null, args[2]);
+        } else if (args.length == 4 && args[1].length() > 5 && args[2].equals("--")) {
+            Repository.checkoutFile(args[1], args[3]);
+        } else {
             exit("Incorrect operands.");
         }
     }

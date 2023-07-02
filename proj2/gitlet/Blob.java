@@ -1,6 +1,7 @@
 package gitlet;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 
 import static gitlet.Utils.*;
@@ -24,6 +25,16 @@ public class Blob implements Serializable {
         this.name = name;
         this.path = path;
         this.contents = readContents(this.path);
+    }
+
+    /** Overwrites the file contents with the version of the blob. */
+    public void overwrite() {
+        try {
+            path.createNewFile();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        writeContents(path, contents);
     }
 
     /** Returns the name of the blob. */

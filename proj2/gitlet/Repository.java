@@ -81,7 +81,7 @@ public class Repository {
 
     /** Starting at the current head commit, display each commit backwards until the initial commit. */
     public static void log() {
-        Branch b = readObject(getCurrentBranch(), Branch.class);
+        Branch b = getCurrentBranch();
         System.out.print(readContentsAsString(b.getLogFile()));
     }
 
@@ -91,9 +91,30 @@ public class Repository {
         System.out.print(readObject(INDEX, Index.class).toString());
     }
 
+    /** Takes the version of the file as it exists in the commit with the given id, and puts it in the working
+     *  directory, overwriting the version of the file that’s already there if there is one. */
+    public static void checkoutFile(String commitID, String fileName) {
+        if (commitID == null) {
+            commitID = getCurrentCommit().getUID();
+        }
+        Blob b = Commit.find(commitID, join(CWD, fileName));
+        b.overwrite();
+    }
+
+    /** Takes all files in the commit at the head of the given branch, and puts them in the working directory,
+     *  overwriting the versions of the files that are already there if they exist. */
+    public static void checkoutBranch(String branchName) {
+        exit("Not implemented yet.");
+    }
+
     /** Returns the object of the current working branch. */
-    public static File getCurrentBranch() {
-        return join(GITLET_DIR, readContentsAsString(HEAD));
+    public static Branch getCurrentBranch() {
+        return readObject(join(GITLET_DIR, readContentsAsString(HEAD)), Branch.class);
+    }
+
+    /** Returns the object of the current (latest) commit. */
+    public static Commit getCurrentCommit() {
+        return getCurrentBranch().getCommit();
     }
 
 }
