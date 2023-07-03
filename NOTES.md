@@ -76,6 +76,11 @@ Notes taken when auditing CS 61B, please refer to the original slides and lectur
     - [Height, Depth, and Performance](#height-depth-and-performance)
     - [B-Trees, 2-3 Trees, 2-3-4 Trees](#b-trees-2-3-trees-2-3-4-trees)
     - [B-Tree Invariants and runtime analysis](#b-tree-invariants-and-runtime-analysis)
+  - [Lecture 18: Red Black Trees](#lecture-18-red-black-trees)
+    - [BST Structure and Tree Rotation](#bst-structure-and-tree-rotation)
+    - [Red Black Trees](#red-black-trees)
+    - [Maintaining 1-1 Correspondence Through Rotations](#maintaining-1-1-correspondence-through-rotations)
+    - [LLRB Runtime and Implementation](#llrb-runtime-and-implementation)
 
 </details>
 
@@ -1004,6 +1009,101 @@ Runtime for `contains` and `add`
 - Worst case number of nodes to inspect: $H + 1$
 - Worst case number of items to inspect per node: $L$
 - Overall runtime: $O(HL)$, since $H = \Theta (\log N)$, overall runtime is $O(L \log N)$
+
+### Lecture 18: Red Black Trees
+
+#### BST Structure and Tree Rotation
+
+Suppose we have a `BST` with the numbers 1, 2, and 3, there are five possible BSTs
+- The specific BST you get is **based on the insertion order**
+- For `N` items there are `Catalan(N)` different BSTs
+- Given any BST, it is possible to move to a different configuration using `rotation`
+
+`rotateLeft(G)`
+- Let `P` be the right child of `G`, make `G` the **new left child** of `P`
+  - Can think of as temporarily merging `G` and `P`, then send `G` down and left
+  - Preserves search tree property, no changes to semantics of the tree
+
+Rotation for balance
+- Preserves search tree property
+- Can shorten or lengthen a tree
+- Allows balancing of a BST in $O(N)$ moves
+
+#### Red Black Trees
+
+Build a `BST` that is ***structurally identical*** to a `2-3 tree`.
+
+*Dealing with 3-Nodes*
+- Possibility 1: Create dummy "glue" nodes
+  - Result is inelegant. Wasted link. Ugly code.
+- Possibility 2: Create "glue" links with the smaller item **off to the left**
+  - Commonly used in practice (e.g. `java.util.TreeSet`).
+  - We'll mark glue links as `red`. 
+
+Left-Leaning Red Black Binary Search Tree `LLRB`
+- `LLRB` are normal BSTs
+- Left glue links that represent a `2-3 Tree`
+- **1-1 correspondence** between an `LLRB` and the equivalent `2-3 Tree`
+- Red is just a convenient fiction, nothing special
+
+`LLRB` Properties
+- No node has two *red links*
+- **Every path from root to a leaf** has same number of *black links*
+- `2-3 tree` of height $H$, maximum height of the corresponding `LLRB` is $2H+1$
+
+#### Maintaining 1-1 Correspondence Through Rotations
+
+- When inserting: *use a red link*
+- If there is a **right red link** (Left Leaning Violation)
+  - *Rotate left the appropriate node*
+- If there are **two consecutive left red links** (Incorrect 4-Node Violation)
+  - *Rotate right the appropriate node*
+- If there are any nodes with **two red children** (Temporary 4-Node)
+  - *Flip the colors of all edges* to emulation the `split` operation
+
+> ***Cascading operations:** It is possible that a rotation or flip operation will cause an additional violation that needs fixing.*
+
+#### LLRB Runtime and Implementation
+
+Runtime analysis for `LLRB` is simple if you trust `2-3 Tree` runtime
+- LLRB tree has **height** $O(\log N)$
+- `Contains` is trivially $O(\log N)$
+- `Insert` is $O(\log N)$
+  - $O(\log N)$ to add a new node
+  - $O(\log N)$ rotation and color flip operations per insert
+
+`LLRB` implementation
+
+```java
+private Node put(Node h, Key key, Value val) {
+    if (h == null) { return new Node(key, val, RED); }
+
+    int cmp = key.compareTo(h.key);
+    if (cmp < 0)      { h.left  = put(h.left,  key, val); }
+    else if (cmp > 0) { h.right = put(h.right, key, val); }
+    else              { h.val   = val;                    }
+
+    // fix-up any right-leaning links
+    if (isRed(h.right) && !isRed(h.left))      { h = rotateLeft(h);  }
+    if (isRed(h.left)  &&  isRed(h.left.left)) { h = rotateRight(h); }
+    if (isRed(h.left)  &&  isRed(h.right))     { flipColors(h);      }
+
+    h.size = size(h.left) + size(h.right) + 1;
+    return h;
+}
+```
+
+- Naive `BST` is simple, but they are subject to imbalance
+- `B-Tree` is balanced but painful to implement and relatively slow
+- `LLRB` **insertion** is simple to implement, *but deletion is hard*
+  - Works by ***maintaining mathematical bijection*** with `2-3 Tree`
+- Java's `TreeMap` is a red-black tree (not left leaning)
+  - Maintains correspondence with `2-3-4 Tree` (not 1-1 correspondence)
+  - Allows glue links on either side
+  - More complex implementation, but faster
+
+
+
 
 
 
