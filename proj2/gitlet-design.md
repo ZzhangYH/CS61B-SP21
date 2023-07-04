@@ -33,10 +33,9 @@ This is the staging area of the gitlet repository. It holds `maps` of **staged**
 #### Fields
 
 1. `private final HashMap<File, Blob> staged` Map of the files staged.
-2. `private final HashMap<File, Blob> tracked` Map of the files tracked.
-3. `private final HashMap<File, Blob> removed` Map of the files removed.
+2. `private final HashMap<File, Blob> removed` Map of the files removed.
 
-`Default Constructor` Initializes the `staged`, `tracked`, and `removed` maps.
+`Default Constructor` Initializes the `staged` and `removed` maps.
 
 ### Branch
 
@@ -80,7 +79,7 @@ A blob holds the detailed information of a file in the repository. It helps comm
 2. `private final File path` Absolute path to the file of this blob.
 3. `private final byte[] contents` Contents in the file of this blob.
 
-`Constructor` Sets the **name** and **path** of the blob taken from the parameter and **reads the file contents**.
+`Constructor` Sets the **name** and **path** of the blob taken from the parameter and **reads the file contents** (`contents` will be `null` is the file does not exist).
 
 All instance variables are all `final` because once the `Blob` is generated there won't be changes to it. ***Any modifications*** to the file contents will generate a **new** `Blob` to be tracked.
 
@@ -100,15 +99,28 @@ Then the system will create a default branch `master` in the repository, and com
 
 ### add
 
-`add` command takes a `file name` as the second command line argument, adding a copy of the file as it currently exists to the staging area. **If the file does not exist**, print the error message `File does not exist.` and exit without changing anything. Firstly, the program checks *whether the current working version of the file is **identical to that in the last commit***, if true it will not be staged and will be removed it if it is already there. When the file is **eligible to be added**, it will be passed to `staged` and `tracked` area so that the `Index` object will be updated and saved accordingly.
+`add` command takes a `file name` as the second command line argument, adding a copy of the file as it currently exists to the staging area. **If the file does not exist**, print the error message `File does not exist.` and exit without changing anything. Firstly, the program checks *whether the current working version of the file is **identical to that in the last commit***, if true it will not be staged and will be removed it if it is already there. When the file is **eligible to be added**, it will be passed to `staged` area and the `Index` object will be updated and saved accordingly.
+
+### rm
+
+**If the file is neither staged nor tracked by the head commit, (or even does not exist)**, exit with message `No reason to remove the file.`
+
+The `rm` command is quite straightforward:
+1. It removes the file taken as `args[1]` from the `staged` area if it exists.
+2. If the file is ***tracked*** in the current commit, 
+   - it will be added to `removed` so that it is staged for removal.
+   - it will be removed from the working directory if the user has not already done so.
+3. Update the staging area (`Index` object).
 
 ### commit
 
 The command starts by checking
+- **If the commit has a blank message**, abort and print `Please enter a commit message.`
 - **If no files have been staged for commit**, abort and print `No changes added to the commit.`
-- **If the commit have a non-blank message**, abort and print `Please enter a commit message.`
 
-When committing a `commit` by calling `public void commit()`, the program will create the file holding the `commit` object, generate the **SHA-1** `UID` according to *file references*, *parent reference*, *log message*, and *commit time*, and **clear the staging area**. Then, the program saves this `commit` under `.gitlet/objects` identified by its `UID`, finds the current working branch with `.gitlet/HEAD`, updates the commit into it, and appends the commit details to the `log` file of the branch.
+It then updates the `blobs` of the commit, **adding** those *new-staged* ones, **overwriting** the *modified* ones, and **removing** those that have been *stage for removal*.
+
+After all things are done, the program will create the file holding the `commit` object, generate the **SHA-1** `UID` according to *file references*, *parent reference*, *log message*, and *commit time*, and **clear the staging area**. Finally, the program saves this `commit` under `.gitlet/objects` identified by its `UID`, finds the current working branch with `.gitlet/HEAD`, updates the commit into it, and appends the commit details to the `log` file of the branch.
 
 According to the real `git`, the commit objects are *stored under the subfolder of their first two digits of their* `UID` so that it makes searching for commits ***faster*** (the complexity of naive pointer representation will be linear in the number of objects)
 
@@ -120,7 +132,7 @@ The `log` command displays information about each commit, starting at the curren
 
 ### status
 
-`status` command displays **what branches currently exist**, and marks the current branch with a `*`. It also displays **what files have been staged for *addition* or *removal***. The message to be printed of the repository can be accessed by `Index.toString()` method which reads and formats all information needed and listed in *lexicographic order*, using Java string-comparison.
+`status` command displays **what branches currently exist**, and marks the current branch with a `*`. It also displays **what files have been staged for *addition* or *removal***. The message to be printed of the repository can be accessed by calling `toString()` method in the `Index` class which reads and formats all information needed and listed in *lexicographic order*, using Java string-comparison.
 
 ### checkout
 

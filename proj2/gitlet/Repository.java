@@ -69,6 +69,14 @@ public class Repository {
         idx.add(fileName, file);
     }
 
+    /** Stages the file for removal and remove the file if it is tracked in the current commit. */
+    public static void rmFile(String fileName) {
+        // File does not exist.
+        File file = join(CWD, fileName);
+        Index idx = readObject(INDEX, Index.class);
+        idx.remove(fileName, file);
+    }
+
     /** Adds a copy of the file as it currently exists to the staging area. */
     public static void commit(String message) {
         // Commit must have a non-blank message.
@@ -79,7 +87,7 @@ public class Repository {
         c.commit();
     }
 
-    /** Starting at the current head commit, display each commit backwards until the initial commit. */
+    /** Starting at the current head commit, displays each commit backwards until the initial commit. */
     public static void log() {
         Branch b = getCurrentBranch();
         System.out.print(readContentsAsString(b.getLogFile()));

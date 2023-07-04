@@ -25,6 +25,11 @@ public class Main {
      *      current commit, do not stage it to be added, and remove it from the staging area
      *      if it is already there.
      *
+     *  rm <file name> --
+     *      Unstage the file if it is currently staged for addition. If the file is tracked in
+     *      the current commit, stage it for removal and remove the file from the working directory
+     *      if the user has not already done so.
+     *
      *  commit <message> --
      *      Saves a snapshot of tracked files in the current commit and staging area so they can
      *      be restored at a later time, creating a new commit. The commit is said to be tracking
@@ -73,6 +78,10 @@ public class Main {
             case "add":
                 validate(args, 2);
                 Repository.addFile(args[1]);
+                break;
+            case "rm":
+                validate(args, 2);
+                Repository.rmFile(args[1]);
                 break;
             case "commit":
                 validate(args, 2);

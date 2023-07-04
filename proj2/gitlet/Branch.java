@@ -33,7 +33,7 @@ public class Branch implements Serializable {
         writeObject(this.getRefFile(), this);
     }
 
-    /** Update the branch with the latest commit and save it. */
+    /** Updates the branch with the latest commit and save it. */
     public void setCommit(Commit commit) {
         this.commit = commit;
         writeObject(this.getRefFile(), this);

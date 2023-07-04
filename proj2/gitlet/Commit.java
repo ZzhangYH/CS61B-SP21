@@ -56,17 +56,14 @@ public class Commit implements Serializable {
         this.UID = sha1(vals);
     }
 
-    /** Commit and write to the logs. */
+    /** Commits and writes to the logs. */
     public void commit() {
-        // Checks the staging area.
-        Index idx = readObject(INDEX, Index.class);
-        if (idx.getStaged().size() == 0 && this.parent != null) {
-            exit("No changes added to the commit.");
-        } else {
-            blobs.putAll(idx.getStaged());
-            idx.clear();
+        // Checks the staging area unless the initial commit.
+        if (parent != null) {
+            checkCommit();
         }
-        this.setUID();
+        // Generates UID.
+        setUID();
         // Writes the commit object.
         try {
             File folder = getPathFolder();
@@ -82,6 +79,21 @@ public class Commit implements Serializable {
         Branch b = getCurrentBranch();
         b.setCommit(this);
         writeContents(b.getLogFile(), this.toString() + "\n" + readContentsAsString(b.getLogFile()));
+    }
+
+    /** Checks the staging area to validate commit eligibility. */
+    public void checkCommit() {
+        Index idx = readObject(INDEX, Index.class);
+        HashMap<File, Blob> staged = idx.getStaged();
+        HashMap<File, Blob> removed = idx.getRemoved();
+        if (staged.isEmpty() && removed.isEmpty()) {
+            exit("No changes added to the commit.");
+        }
+        for (File f : removed.keySet()) {
+            blobs.remove(f);
+        }
+        blobs.putAll(idx.getStaged());
+        idx.clear();
     }
 
     /** Returns the blob of the specified file tracked by the specified UID (or abbreviation). */
@@ -117,12 +129,17 @@ public class Commit implements Serializable {
         return b;
     }
 
-    /** Return the path to the objs subfolder. */
+    /** Returns whether the specified file is tracked by the commit. */
+    public boolean isTracked(File file) {
+        return this.blobs.containsKey(file);
+    }
+
+    /** Returns the path to the objs subfolder. */
     public File getPathFolder() {
         return join(OBJECTS_DIR, this.UID.substring(0, 2));
     }
 
-    /** Return the path to the objs file. */
+    /** Returns the path to the objs file. */
     public File getPathFile() {
         return join(getPathFolder(), this.UID.substring(2));
     }
@@ -152,7 +169,7 @@ public class Commit implements Serializable {
         return this.UID;
     }
 
-    /** Return the commit as a log of String. */
+    /** Returns the commit as a log of String. */
     @Override
     public String toString() {
         SimpleDateFormat d = new SimpleDateFormat("E MMM dd HH:mm:ss yyyy Z", Locale.ENGLISH);

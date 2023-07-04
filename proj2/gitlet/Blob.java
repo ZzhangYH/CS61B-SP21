@@ -24,7 +24,11 @@ public class Blob implements Serializable {
     public Blob(String name, File path) {
         this.name = name;
         this.path = path;
-        this.contents = readContents(this.path);
+        if (path.exists()) {
+            this.contents = readContents(this.path);
+        } else {
+            this.contents = null;
+        }
     }
 
     /** Overwrites the file contents with the version of the blob. */

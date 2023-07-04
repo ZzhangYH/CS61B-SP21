@@ -17,15 +17,12 @@ public class Index implements Serializable {
 
     /** Map of the files staged. */
     private final HashMap<File, Blob> staged;
-    /** Map of the files tracked. */
-    private final HashMap<File, Blob> tracked;
     /** Map of the files removed. */
     private final HashMap<File, Blob> removed;
 
-    /** Default constructor, initialize the instance variables. */
+    /** Default constructor, initializes the instance variables. */
     public Index() {
         staged = new HashMap<File, Blob>();
-        tracked = new HashMap<File, Blob>();
         removed = new HashMap<File, Blob>();
     }
 
@@ -46,9 +43,25 @@ public class Index implements Serializable {
         if (isModified(file)) {
             Blob b = new Blob(fileName, file);
             staged.put(file, b);
-            tracked.put(file, b);
         } else {
             staged.remove(file);
+        }
+        removed.remove(file);
+        save();
+    }
+
+    /** Unstages the file and removes it if eligible. */
+    public void remove(String fileName, File file) {
+        boolean tracked = getCurrentCommit().isTracked(file);
+        if (!staged.containsKey(file) && !tracked) {
+            exit("No reason to remove the file.");
+        }
+        staged.remove(file);
+        if (tracked) {
+            removed.put(file, new Blob(fileName, file));
+            if (file.exists()) {
+                file.delete();
+            }
         }
         save();
     }
@@ -67,11 +80,6 @@ public class Index implements Serializable {
     /** Returns the map of the staged blobs. */
     public HashMap<File, Blob> getStaged() {
         return this.staged;
-    }
-
-    /** Returns the map of the tracked blobs. */
-    public HashMap<File, Blob> getTracked() {
-        return this.tracked;
     }
 
     /** Returns the map of the removed blobs. */
@@ -113,6 +121,10 @@ public class Index implements Serializable {
         }
 
         status.append("\n=== Removed Files ===\n");
+        String[] removedStr = sort(removed);
+        for (String s : removedStr) {
+            status.append(s).append("\n");
+        }
 
         status.append("\n=== Modifications Not Staged for Commit ===\n");
 
