@@ -51,7 +51,7 @@ Notes taken when auditing CS 61B, please refer to the original slides and lectur
     - [Lists and Sets in Java](#lists-and-sets-in-java)
     - [Exceptions](#exceptions)
     - [Iteration](#iteration)
-    - [`toString()` and Equals](#tostring-and-equals)
+    - [Object Methods: toString and Equals](#object-methods-tostring-and-equals)
 - [Week 5](#week-5)
   - [Lecture 12: Command Line Programming, Git, and Project 2 Preview](#lecture-12-command-line-programming-git-and-project-2-preview)
   - [Lecture 13: Asymptotics I](#lecture-13-asymptotics-i)
@@ -81,6 +81,12 @@ Notes taken when auditing CS 61B, please refer to the original slides and lectur
     - [Red Black Trees](#red-black-trees)
     - [Maintaining 1-1 Correspondence Through Rotations](#maintaining-1-1-correspondence-through-rotations)
     - [LLRB Runtime and Implementation](#llrb-runtime-and-implementation)
+  - [Lecture 19: Hashing](#lecture-19-hashing)
+    - [Data Indexed Arrays](#data-indexed-arrays)
+    - [Integer Overflow and Hash Codes](#integer-overflow-and-hash-codes)
+    - [Hash Table: Handling Collisions](#hash-table-handling-collisions)
+    - [Hash Table Performance](#hash-table-performance)
+    - [Hash Table in Java](#hash-table-in-java)
 
 </details>
 
@@ -630,7 +636,7 @@ for (int x : javaset) {
 - Complete the above support for ugly iteration
 - Add `implements Iterable<T>` to the line defining the class
 
-#### `toString()` and Equals
+#### Object Methods: toString and Equals
 
 The `toString()` method provides a string representation of an object
 - `System.out.println(Object x)` calls `x.toString()`
@@ -1101,6 +1107,110 @@ private Node put(Node h, Key key, Value val) {
   - Maintains correspondence with `2-3-4 Tree` (not 1-1 correspondence)
   - Allows glue links on either side
   - More complex implementation, but faster
+
+### Lecture 19: Hashing
+
+#### Data Indexed Arrays
+
+`DataIndexedIntegerSet` Use data as an index
+- Create an *array of **booleans** indexed by data*
+- Initially all values are `false`
+- When an item is added, set appropriate index to `true`
+- Extremely waste of memory
+- Need some way to generalize beyond integers
+
+`DataIndexedEnglishWordSet` Use all digits by multiplying each by a power of 27
+- $a = 1, b = 2, c = 3, ..., z = 26$
+- The index of "*cat*" is $(3 \times 27^2) + (1 \times 27^1) + (20 \times 27^0) = 2234$
+- Only lowercase English characters is too restrictive
+
+`DataIndexedStringSet` Use ASCII and even Unicode format
+- "*eGg!*" $= (98 \times 126^3) + (71 \times 126^2) + (98 \times 126^1) + (33 \times 126^0) = 203,178,213$
+- "*守门员*" $= (23432 \times 40959^2) + (38376 \times 40959^1) + (21592 \times 40959^0) = 39,312,024,869,368$
+
+#### Integer Overflow and Hash Codes
+
+In Java, the largest possible integer is 2,147,483,647
+- With base 126, we will run into overflow even for short strings like "*omens*" = 28,196,917,171
+- With ASCII, "*melt banana*" and "*subterrestrial anticosmetic*" will be the same
+
+Hash code and pigeonhole principle
+
+> *A **hash code** "projects a value from a set with many (or even an infinite number of) members to a value from a set with a fixed number of (fewer) members".*
+>
+> ***Pigeonhole principle** tells us that if there are more than 4,294,967,296 possible items, multiple items will share the same hash code.*
+
+- Here our target set is the set of Java integers, which is of size 4,294,967,296
+- ***Collisions are inevitable***
+
+#### Hash Table: Handling Collisions
+
+Suppose $N$ items have the same numerical representation `h`:
+- Instead of storing `true` in position `h`, store a bucket of these $N$ items at position `h`.
+- A bucket can be implemented as `LinkedList`, `ArrayList`, `ArraySet`
+
+"*Separate chaining data indexed array*"
+- Each bucket in our array is initially empty
+- When an item $x$ gets added at index `h`:
+  - If bucket `h` is *empty*, we create a new list containing $x$ and store it at index `h`
+  - If bucket `h` is *already a list*, we add $x$ to this list if it is not already present
+- Worst case runtime will be **proportional to length of longest list**
+- Can use modulus of hash code to **reduce bucket count**, but lists will be longer
+
+`Hash Table`
+- Data is converted by a **hash function** into an *integer representation* called a `hash code`
+- The `hash code` is then **reduced** to a valid *index*, usually using the modulus operator
+
+```mermaid
+graph LR;
+  data([data: 抱抱]) -- unicodeToInt --> hashcode[[hash code: 1034854400]]
+  hashcode -- %10 --> index[index: 0]
+```
+
+#### Hash Table Performance
+
+> *Now we use way **less memory** and can now handle **arbitrary data**, but worst case runtime is now* $\Theta (Q)$*, where* $Q$ *is the length of the longest list.*
+
+Improving the Hash Table
+- Suppose we have: An increasing number of **buckets** $M$, An increasing number of **items** $N$
+- As long as $M = \Theta (N)$, then $O(N/M) = O(1)$
+- Resizing! e.g. When $N/M \geq 1.5$, then double $M$
+
+| Worst case runtime                           | `contains(x)`     | `add(x)`          |
+| -------------------------------------------- | ----------------- | ----------------- |
+| Bushy `BST`                                  | $\Theta (\log N)$ | $\Theta (\log N)$ |
+| `DataIndexedArray`                           | $\Theta (1)$      | $\Theta (1)$      |
+| Separate chaining `Hash Table` no resizing   | $\Theta (N)$      | $\Theta (N)$      |
+| Separate chaining `Hash Table` with resizing | $\Theta (1)$*     | $\Theta (1)$*     |
+
+Hash table operations are on average constant time if:
+- We double $M$ to ***ensure constant average bucket length***
+- ***Items are evenly distributed***
+
+#### Hash Table in Java
+
+Hash tables are the most popular implementation for *sets* and *maps*
+- Python dictionaries are just hash tables in disguise
+- In Java, implemented as `java.util.HashMap` and `java.util.HashSet`
+  - All objects in Java must implement a `hashCode()` method
+
+Negative hash codes in Java
+- If hash code is -1, `-1 % 4 = -1` will result in index errors
+- Use `Math.floorMod(-1, 4) = 3` instead
+
+**Warning #1:** *Never store objects that can change in a* `HashSet` *or* `HashMap`
+- If an object's variables changes, then its hash code changes, may result in items getting lost
+
+**Warning #2:** *Never override* `equals()` *without also overriding* `hashCode()`
+- Can also lead to items getting lost and generally weird behavior
+- `HashMaps` and `HashSets` use `equals()` to determine if an item exists in a particular bucket
+
+A typical hash code base is a ***small prime***
+- Why prime?
+  - Avoids the overflow issue
+  - Lower chance of resulting `hashCode()` having a bad relationship with the number of buckets
+- Why small?
+  - Lower cost to compute
 
 
 
