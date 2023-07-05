@@ -32,8 +32,8 @@ This is the staging area of the gitlet repository. It holds `maps` of **staged**
 
 #### Fields
 
-1. `private final HashMap<File, Blob> staged` Map of the files staged.
-2. `private final HashMap<File, Blob> removed` Map of the files removed.
+1. `private final Map<File, Blob> staged` Map of the files staged.
+2. `private final Map<File, Blob> removed` Map of the files removed.
 
 `Default Constructor` Initializes the `staged` and `removed` maps.
 
@@ -59,7 +59,7 @@ This class represents a `Commit` in our gitlet repository. Each commit is **iden
 
 #### Fields
 
-1. `private HashMap<File, Blob> blobs` Map of file to the Blob contents of the commit.
+1. `private Map<File, Blob> blobs` Map of file to the Blob contents of the commit.
 2. `private final String message` Message of the commit.
 3. `private final Date date` Timestamp of the commit.
 4. `private Commit parent` Not implemented yet.

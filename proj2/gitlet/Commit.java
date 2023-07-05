@@ -16,7 +16,7 @@ import static gitlet.Repository.*;
 public class Commit implements Serializable {
 
     /** Map of file tracked by this commit. */
-    private final HashMap<File, Blob> blobs = new HashMap<File, Blob>();
+    private final Map<File, Blob> blobs = new HashMap<File, Blob>();
     /** Message of this commit. */
     private final String message;
     /** Date of this commit. */
@@ -43,7 +43,7 @@ public class Commit implements Serializable {
 
     /** Generates and sets the UID of the commit. */
     public void setUID() {
-        ArrayList<Object> vals = new ArrayList<Object>();
+        List<Object> vals = new ArrayList<Object>();
         Set<File> files = blobs.keySet();
         for (File f : files) {
             vals.add(f.toString());
@@ -83,9 +83,9 @@ public class Commit implements Serializable {
 
     /** Checks the staging area to validate commit eligibility. */
     public void checkCommit() {
-        Index idx = readObject(INDEX, Index.class);
-        HashMap<File, Blob> staged = idx.getStaged();
-        HashMap<File, Blob> removed = idx.getRemoved();
+        Index idx = getIndex();
+        Map<File, Blob> staged = idx.getStaged();
+        Map<File, Blob> removed = idx.getRemoved();
         if (staged.isEmpty() && removed.isEmpty()) {
             exit("No changes added to the commit.");
         }
@@ -97,7 +97,7 @@ public class Commit implements Serializable {
     }
 
     /** Returns the blob of the specified file tracked by the specified UID (or abbreviation). */
-    public static Blob find(String commitID, File file) {
+    public static Blob findBlob(String commitID, File file) {
         String id1 = commitID.substring(0, 2);
         String id2 = commitID.substring(2);
         File dir = join(OBJECTS_DIR, id1);
@@ -145,7 +145,7 @@ public class Commit implements Serializable {
     }
 
     /** Returns the map of blobs of the commit. */
-    public HashMap<File, Blob> getBlobs() {
+    public Map<File, Blob> getBlobs() {
         return this.blobs;
     }
 

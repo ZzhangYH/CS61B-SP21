@@ -39,7 +39,7 @@ public class Repository {
             exit("A Gitlet version-control system already exists in the current directory.");
         }
 
-        // Initialize the directories.
+        // Initializes the directories.
         GITLET_DIR.mkdir();
         OBJECTS_DIR.mkdir();
         REFS_DIR.mkdir();
@@ -48,12 +48,14 @@ public class Repository {
         join(LOGS_DIR, "refs").mkdir();
         join(LOGS_DIR, "refs", "heads").mkdir();
 
-        // Create default branch.
-        Branch master = new Branch("master");
-        writeContents(HEAD, master.getPath().toString());
+        // Creates staging area.
         writeObject(INDEX, new Index());
 
-        // Create initial commit.
+        // Creates default branch.
+        Branch master = new Branch("master");
+        writeContents(HEAD, master.getPath().toString());
+
+        // Creates initial commit.
         Commit init = new Commit();
         init.commit();
     }
@@ -65,7 +67,7 @@ public class Repository {
         if (!file.exists()) {
             exit("File does not exist.");
         }
-        Index idx = readObject(INDEX, Index.class);
+        Index idx = getIndex();
         idx.add(fileName, file);
     }
 
@@ -73,7 +75,7 @@ public class Repository {
     public static void rmFile(String fileName) {
         // File does not exist.
         File file = join(CWD, fileName);
-        Index idx = readObject(INDEX, Index.class);
+        Index idx = getIndex();
         idx.remove(fileName, file);
     }
 
@@ -96,7 +98,7 @@ public class Repository {
     /** Displays what branches currently exist, (marking the current branch with a *) and
      *  what files have been staged for addition or removal. */
     public static void status() {
-        System.out.print(readObject(INDEX, Index.class).toString());
+        System.out.print(getIndex().toString());
     }
 
     /** Takes the version of the file as it exists in the commit with the given id, and puts it in the working
@@ -105,7 +107,7 @@ public class Repository {
         if (commitID == null) {
             commitID = getCurrentCommit().getUID();
         }
-        Blob b = Commit.find(commitID, join(CWD, fileName));
+        Blob b = Commit.findBlob(commitID, join(CWD, fileName));
         b.overwrite();
     }
 
@@ -123,6 +125,11 @@ public class Repository {
     /** Returns the object of the current (latest) commit. */
     public static Commit getCurrentCommit() {
         return getCurrentBranch().getCommit();
+    }
+
+    /** Returns the repository staging area. */
+    public static Index getIndex() {
+        return readObject(INDEX, Index.class);
     }
 
 }
