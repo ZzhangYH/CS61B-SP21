@@ -96,6 +96,25 @@ public class Commit implements Serializable {
         idx.clear();
     }
 
+    /** Finds all commits ever made and returns them as a set. */
+    public static Set<Commit> findAll() {
+        List<String> dirs = subDirNamesIn(OBJECTS_DIR);
+        Set<Commit> commits = new HashSet<Commit>();
+        if (dirs != null) {
+            for (String dir : dirs) {
+                File subDir = join(OBJECTS_DIR, dir);
+                List<String> files = plainFilenamesIn(subDir);
+                if (files == null) {
+                    continue;
+                }
+                for (String file: files) {
+                    commits.add(readObject(join(subDir, file), Commit.class));
+                }
+            }
+        }
+        return commits;
+    }
+
     /** Returns the blob of the specified file tracked by the specified UID (or abbreviation). */
     public static Blob findBlob(String commitID, File file) {
         String id1 = commitID.substring(0, 2);
@@ -134,24 +153,14 @@ public class Commit implements Serializable {
         return this.blobs.containsKey(file);
     }
 
-    /** Returns the path to the objs subfolder. */
-    public File getPathFolder() {
-        return join(OBJECTS_DIR, this.UID.substring(0, 2));
-    }
-
-    /** Returns the path to the objs file. */
-    public File getPathFile() {
-        return join(getPathFolder(), this.UID.substring(2));
+    /** Returns the Blob of the file specified. */
+    public Blob getBlob(File file) {
+        return blobs.get(file);
     }
 
     /** Returns the map of blobs of the commit. */
     public Map<File, Blob> getBlobs() {
         return this.blobs;
-    }
-
-    /** Returns the Blob of the file specified. */
-    public Blob getBlob(File file) {
-        return blobs.get(file);
     }
 
     /** Returns the message of the commit. */
@@ -167,6 +176,16 @@ public class Commit implements Serializable {
     /** Returns the UID of the commit. */
     public String getUID() {
         return this.UID;
+    }
+
+    /** Returns the path to the objs subfolder. */
+    public File getPathFolder() {
+        return join(OBJECTS_DIR, this.UID.substring(0, 2));
+    }
+
+    /** Returns the path to the file holding the commit object. */
+    public File getPathFile() {
+        return join(getPathFolder(), this.UID.substring(2));
     }
 
     /** Returns the commit as a log of String. */

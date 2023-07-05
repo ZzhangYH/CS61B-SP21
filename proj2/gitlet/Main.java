@@ -42,6 +42,10 @@ public class Main {
      *      backwards along the commit tree until the initial commit, following the first parent
      *      commit links, ignoring any second parents found in merge commits.
      *
+     *  global-log --
+     *      Like log, except displays information about all commits ever made. The order of the
+     *      commits does not matter.
+     *
      *  status --
      *      Displays what branches currently exist, and marks the current branch with a *. Also
      *      displays what files have been staged for addition or removal. Entries should be listed
@@ -90,6 +94,10 @@ public class Main {
             case "log":
                 validate(args, 1);
                 Repository.log();
+                break;
+            case "global-log":
+                validate(args, 1);
+                Repository.globalLog();
                 break;
             case "status":
                 validate(args, 1);

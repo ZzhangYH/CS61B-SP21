@@ -168,6 +168,15 @@ class Utils {
             }
         };
 
+    /** Filter out all subdirectories. */
+    private static final FilenameFilter SUB_DIRS =
+            new FilenameFilter() {
+                @Override
+                public boolean accept(File dir, String name) {
+                    return new File(dir, name).isDirectory();
+                }
+            };
+
     /** Returns a list of the names of all plain files in the directory DIR, in
      *  lexicographic order as Java Strings.  Returns null if DIR does
      *  not denote a directory. */
@@ -186,6 +195,19 @@ class Utils {
      *  not denote a directory. */
     static List<String> plainFilenamesIn(String dir) {
         return plainFilenamesIn(new File(dir));
+    }
+
+    /** Returns a list of the names of all subdirectories in the directory DIR, in
+     *  lexicographic order as Java Strings.  Returns null if DIR does
+     *  not denote a directory. */
+    static List<String> subDirNamesIn(File dir) {
+        String[] dirs = dir.list(SUB_DIRS);
+        if (dirs == null) {
+            return null;
+        } else {
+            Arrays.sort(dirs);
+            return Arrays.asList(dirs);
+        }
     }
 
     /* OTHER FILE UTILITIES */

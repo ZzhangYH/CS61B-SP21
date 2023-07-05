@@ -130,6 +130,10 @@ According to the real `git`, the commit objects are *stored under the subfolder 
 
 The `log` command displays information about each commit, starting at the current head commit, **backwards along the commit tree** until the `initial commit`, following the first parent commit links, ignoring any second parents found in merge commits. Since each commit writes to the `log` file of the working branch, the program just finds the current working branch with `.gitlet/HEAD` and prints out everything written in it.
 
+### global-log
+
+This command is similar to `log` except it displays information about ***all commits ever made***. The order of the commits does not matter. Therefore, the program just traverse all subdirectories under `.gitlet/objects` and get all the `Commit` objects ever stored. Print each of their information out using the overridden `toSting()` method.
+
 ### status
 
 `status` command displays **what branches currently exist**, and marks the current branch with a `*`. It also displays **what files have been staged for *addition* or *removal***. The message to be printed of the repository can be accessed by calling `toString()` method in the `Index` class which reads and formats all information needed and listed in *lexicographic order*, using Java string-comparison.

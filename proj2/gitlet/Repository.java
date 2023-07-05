@@ -95,6 +95,13 @@ public class Repository {
         System.out.print(readContentsAsString(b.getLogFile()));
     }
 
+    /** Displays information about all commits ever made. */
+    public static void globalLog() {
+        for (Commit c : Commit.findAll()) {
+            System.out.println(c.toString());
+        }
+    }
+
     /** Displays what branches currently exist, (marking the current branch with a *) and
      *  what files have been staged for addition or removal. */
     public static void status() {
