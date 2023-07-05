@@ -2,9 +2,7 @@ package gitlet;
 
 import java.io.File;
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 import static gitlet.Utils.*;
 import static gitlet.Repository.*;
@@ -68,7 +66,12 @@ public class Index implements Serializable {
 
     /** Checks whether the specified file is modified under that in the last commit. */
     public boolean isModified(File file) {
-        Blob b = getCurrentCommit().getBlob(file);
+        Blob b;
+        if (staged.containsKey(file)) {
+            b = staged.get(file);
+        } else {
+            b = getCurrentCommit().getBlob(file);
+        }
         if (b == null) {
             return true;
         }
@@ -106,32 +109,63 @@ public class Index implements Serializable {
 
         status.append("=== Branches ===\n");
         String current = getCurrentBranch().getName();
-        List<String> all = plainFilenamesIn(join(REFS_DIR, "heads"));
-        for (String b : all) {
-            if (b.equals(current)) {
-                status.append("*");
+        List<String> branches = plainFilenamesIn(join(REFS_DIR, "heads"));
+        if (branches != null) {
+            for (String s : branches) {
+                if (s.equals(current)) {
+                    status.append("*");
+                }
+                status.append(s).append("\n");
             }
-            status.append(b).append("\n");
         }
 
         status.append("\n=== Staged Files ===\n");
-        String[] stagedStr = sort(staged);
-        for (String s : stagedStr) {
+        for (String s : sort(staged)) {
             status.append(s).append("\n");
         }
 
         status.append("\n=== Removed Files ===\n");
-        String[] removedStr = sort(removed);
-        for (String s : removedStr) {
+        for (String s : sort(removed)) {
             status.append(s).append("\n");
         }
 
+        HashMap<File, Blob> tracked = getCurrentCommit().getBlobs();
+
         status.append("\n=== Modifications Not Staged for Commit ===\n");
+        HashSet<String> modifiedNotStaged = new HashSet<String>();
+        for (File f : tracked.keySet()) {
+            if (!f.exists() && !removed.containsKey(f)) {
+                modifiedNotStaged.add(tracked.get(f).getName() + " (deleted)");
+            } else if (f.exists() && !staged.containsKey(f) && isModified(f)) {
+                modifiedNotStaged.add(tracked.get(f).getName() + " (modified)");
+            }
+        }
+        for (File f : staged.keySet()) {
+            if (!f.exists()) {
+                modifiedNotStaged.add(staged.get(f).getName() + " (deleted)");
+            } else if (f.exists() && isModified(f)) {
+                modifiedNotStaged.add(staged.get(f).getName() + " (modified)");
+            }
+        }
+        String[] modifiedFileNames = new String[modifiedNotStaged.size()];
+        modifiedNotStaged.toArray(modifiedFileNames);
+        Arrays.sort(modifiedFileNames);
+        for (String s : modifiedFileNames) {
+            status.append(s).append("\n");
+        }
 
         status.append("\n=== Untracked Files ===\n");
+        List<String> cwdFiles = plainFilenamesIn(CWD);
+        if (cwdFiles != null) {
+            for (String s : cwdFiles) {
+                File f = join(CWD, s);
+                if (!staged.containsKey(f) && !tracked.containsKey(f)) {
+                    status.append(s).append("\n");
+                }
+            }
+        }
 
-        status.append("\n");
-        return status.toString();
+        return status.append("\n").toString();
     }
 
 }
