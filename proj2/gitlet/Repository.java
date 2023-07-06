@@ -102,6 +102,13 @@ public class Repository {
         }
     }
 
+    /** Prints out the ids of all commits that have the given commit message. */
+    public static void find(String message) {
+        for (String s : Commit.findId(message)) {
+            System.out.println(s);
+        }
+    }
+
     /** Displays what branches currently exist, (marking the current branch with a *) and
      *  what files have been staged for addition or removal. */
     public static void status() {

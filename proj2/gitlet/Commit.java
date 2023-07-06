@@ -115,6 +115,21 @@ public class Commit implements Serializable {
         return commits;
     }
 
+    /** Finds the ids of all commits with the specified message and returns as a set. */
+    public static Set<String> findId(String message) {
+        Set<Commit> commits = findAll();
+        Set<String> ids = new HashSet<String>();
+        for (Commit c : commits) {
+            if (c.getMessage().equals(message)) {
+                ids.add(c.getUID());
+            }
+        }
+        if (ids.size() == 0) {
+            exit("Found no commit with that message.");
+        }
+        return ids;
+    }
+
     /** Returns the blob of the specified file tracked by the specified UID (or abbreviation). */
     public static Blob findBlob(String commitID, File file) {
         String id1 = commitID.substring(0, 2);

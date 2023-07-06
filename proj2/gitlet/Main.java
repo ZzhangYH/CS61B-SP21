@@ -46,6 +46,10 @@ public class Main {
      *      Like log, except displays information about all commits ever made. The order of the
      *      commits does not matter.
      *
+     *  find <commit message> --
+     *      Prints out the ids of all commits that have the given commit message, one per line.
+     *      If there are multiple such commits, it prints the ids out on separate lines.
+     *
      *  status --
      *      Displays what branches currently exist, and marks the current branch with a *. Also
      *      displays what files have been staged for addition or removal. Entries should be listed
@@ -98,6 +102,10 @@ public class Main {
             case "global-log":
                 validate(args, 1);
                 Repository.globalLog();
+                break;
+            case "find":
+                validate(args, 2);
+                Repository.find(args[1]);
                 break;
             case "status":
                 validate(args, 1);
