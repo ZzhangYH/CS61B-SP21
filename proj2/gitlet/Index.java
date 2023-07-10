@@ -100,6 +100,49 @@ public class Index implements Serializable {
         return this.removed;
     }
 
+    /** Returns the array of the modified filenames. */
+    public String[] getModified() {
+        Set<String> modifiedSet = new HashSet<String>();
+        Map<File, Blob> tracked = getCurrentCommit().getBlobs();
+        for (File f : tracked.keySet()) {
+            if (!f.exists() && !isRemoved(f)) {
+                modifiedSet.add(tracked.get(f).getName() + " (deleted)");
+            } else if (f.exists() && !isStaged(f) && isModified(f)) {
+                modifiedSet.add(tracked.get(f).getName() + " (modified)");
+            }
+        }
+        for (File f : staged.keySet()) {
+            if (!f.exists()) {
+                modifiedSet.add(staged.get(f).getName() + " (deleted)");
+            } else if (f.exists() && isModified(f)) {
+                modifiedSet.add(staged.get(f).getName() + " (modified)");
+            }
+        }
+        String[] modifiedArray = new String[modifiedSet.size()];
+        modifiedSet.toArray(modifiedArray);
+        Arrays.sort(modifiedArray);
+        return modifiedArray;
+    }
+
+    /** Returns the array of the untracked filenames. */
+    public String[] getUntracked() {
+        Set<String> untrackedSet = new TreeSet<>();
+        Map<File, Blob> tracked = getCurrentCommit().getBlobs();
+        List<String> cwdFiles = plainFilenamesIn(CWD);
+        if (cwdFiles != null) {
+            for (String s : cwdFiles) {
+                File f = join(CWD, s);
+                if (!isStaged(f) && !tracked.containsKey(f)) {
+                    untrackedSet.add(s);
+                }
+            }
+        }
+        String[] untrackedArray = new String[untrackedSet.size()];
+        untrackedSet.toArray(untrackedArray);
+        Arrays.sort(untrackedArray);
+        return untrackedArray;
+    }
+
     /** Converts the map of the files into arrays in lexicographic order. */
     public String[] sort(Map<File, Blob> map) {
         String[] str = new String[map.size()];
@@ -139,40 +182,14 @@ public class Index implements Serializable {
             status.append(s).append("\n");
         }
 
-        Map<File, Blob> tracked = getCurrentCommit().getBlobs();
-
         status.append("\n=== Modifications Not Staged For Commit ===\n");
-        Set<String> modifiedSet = new HashSet<String>();
-        for (File f : tracked.keySet()) {
-            if (!f.exists() && !isRemoved(f)) {
-                modifiedSet.add(tracked.get(f).getName() + " (deleted)");
-            } else if (f.exists() && !isStaged(f) && isModified(f)) {
-                modifiedSet.add(tracked.get(f).getName() + " (modified)");
-            }
-        }
-        for (File f : staged.keySet()) {
-            if (!f.exists()) {
-                modifiedSet.add(staged.get(f).getName() + " (deleted)");
-            } else if (f.exists() && isModified(f)) {
-                modifiedSet.add(staged.get(f).getName() + " (modified)");
-            }
-        }
-        String[] modifiedArray = new String[modifiedSet.size()];
-        modifiedSet.toArray(modifiedArray);
-        Arrays.sort(modifiedArray);
-        for (String s : modifiedArray) {
+        for (String s : getModified()) {
             status.append(s).append("\n");
         }
 
         status.append("\n=== Untracked Files ===\n");
-        List<String> cwdFiles = plainFilenamesIn(CWD);
-        if (cwdFiles != null) {
-            for (String s : cwdFiles) {
-                File f = join(CWD, s);
-                if (!isStaged(f) && !tracked.containsKey(f)) {
-                    status.append(s).append("\n");
-                }
-            }
+        for (String s : getUntracked()) {
+            status.append(s).append("\n");
         }
 
         return status.append("\n").toString();

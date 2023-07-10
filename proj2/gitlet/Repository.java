@@ -123,14 +123,34 @@ public class Repository {
         if (commitID == null) {
             commitID = getCurrentCommit().getUID();
         }
-        Blob b = Commit.findBlob(commitID, join(CWD, fileName));
-        b.overwrite();
+        // Checks whether the file exists in the specified commit.
+        Blob b = Commit.find(commitID).getBlob(join(CWD, fileName));
+        if (b == null) {
+            exit("File does not exist in that commit.");
+        } else {
+            b.overwrite();
+        }
     }
 
     /** Takes all files in the commit at the head of the given branch,
      *  and overwrites the versions of the files that are already there. */
     public static void checkoutBranch(String branchName) {
         exit("Not implemented yet.");
+    }
+
+    /** Resets all the files tracked and the branch's head pointer by the given commit. */
+    public static void reset(String commitID) {
+        Commit c = Commit.find(commitID);
+        // A working file is untracked in the current branch.
+        if (getIndex().getUntracked().length != 0) {
+            exit("There is an untracked file in the way; " +
+                    "delete it, or add and commit it first.");
+        }
+        for (Blob b : c.getBlobs().values()) {
+            b.overwrite();
+        }
+        getCurrentBranch().setCommit(c);
+        getIndex().clear();
     }
 
     /** Returns the object of the current working branch. */

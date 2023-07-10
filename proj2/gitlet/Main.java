@@ -70,6 +70,10 @@ public class Main {
      *          if they exist. Also, at the end of this command, the given branch will now be
      *          considered the current branch.
      *
+     *  reset <commit id> --
+     *      Checks out all the files tracked by the given commit. Removes tracked files that are
+     *      not present in that commit. Also moves the current branch’s head to that commit node.
+     *
      */
     public static void main(String[] args) {
         // No input arguments.
@@ -114,6 +118,10 @@ public class Main {
             case "checkout":
                 checkout(args);
                 break;
+            case "reset":
+                validate(args, 2);
+                Repository.reset(args[1]);
+                break;
             default:
                 exit("No command with that name exists.");
         }
@@ -137,7 +145,7 @@ public class Main {
             Repository.checkoutBranch(args[1]);
         } else if (args.length == 3 && args[1].equals("--")) {
             Repository.checkoutFile(null, args[2]);
-        } else if (args.length == 4 && args[1].length() > 5 && args[2].equals("--")) {
+        } else if (args.length == 4 && args[2].equals("--")) {
             Repository.checkoutFile(args[1], args[3]);
         } else {
             exit("Incorrect operands.");

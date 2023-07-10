@@ -78,8 +78,6 @@ public class Commit implements Serializable {
         // Update the current working branch.
         Branch b = getCurrentBranch();
         b.setCommit(this);
-        writeContents(b.getLogFile(),
-                this.toString() + "\n" + readContentsAsString(b.getLogFile()));
     }
 
     /** Checks the staging area to validate commit eligibility. */
@@ -131,8 +129,8 @@ public class Commit implements Serializable {
         return ids;
     }
 
-    /** Returns the blob of the specified file tracked by the specified UID (or abbreviation). */
-    public static Blob findBlob(String commitID, File file) {
+    /** Returns the Commit object of the specified UID (or abbreviation). */
+    public static Commit find(String commitID) {
         String id1 = commitID.substring(0, 2);
         String id2 = commitID.substring(2);
         File dir = join(OBJECTS_DIR, id1);
@@ -155,13 +153,8 @@ public class Commit implements Serializable {
         if (fullID == null) {
             exit("No commit with that id exists.");
         }
-        // Checks whether the file exists in the specified commit.
         File f = join(OBJECTS_DIR, id1, fullID);
-        Blob b = readObject(f, Commit.class).getBlob(file);
-        if (b == null) {
-            exit("File does not exist in that commit.");
-        }
-        return b;
+        return readObject(f, Commit.class);
     }
 
     /** Returns whether the specified file is tracked by the commit. */
