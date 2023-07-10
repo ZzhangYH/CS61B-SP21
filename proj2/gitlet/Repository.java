@@ -89,7 +89,8 @@ public class Repository {
         c.commit();
     }
 
-    /** Starting at the current head commit, displays each commit backwards until the initial commit. */
+    /** Starting at the current head commit,
+     *  displays each commit backwards until the initial commit. */
     public static void log() {
         Branch b = getCurrentBranch();
         System.out.print(readContentsAsString(b.getLogFile()));
@@ -115,9 +116,10 @@ public class Repository {
         System.out.print(getIndex().toString());
     }
 
-    /** Takes the version of the file as it exists in the commit with the given id, and puts it in the working
-     *  directory, overwriting the version of the file that’s already there if there is one. */
+    /** Takes the version of the file as it exists in the commit with the given id,
+     *  and overwrites the version of the file that's already there. */
     public static void checkoutFile(String commitID, String fileName) {
+        // Takes the current commit if commitID is not specified.
         if (commitID == null) {
             commitID = getCurrentCommit().getUID();
         }
@@ -125,8 +127,8 @@ public class Repository {
         b.overwrite();
     }
 
-    /** Takes all files in the commit at the head of the given branch, and puts them in the working directory,
-     *  overwriting the versions of the files that are already there if they exist. */
+    /** Takes all files in the commit at the head of the given branch,
+     *  and overwrites the versions of the files that are already there. */
     public static void checkoutBranch(String branchName) {
         exit("Not implemented yet.");
     }

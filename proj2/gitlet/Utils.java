@@ -170,12 +170,12 @@ class Utils {
 
     /** Filter out all subdirectories. */
     private static final FilenameFilter SUB_DIRS =
-            new FilenameFilter() {
-                @Override
-                public boolean accept(File dir, String name) {
-                    return new File(dir, name).isDirectory();
-                }
-            };
+        new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                return new File(dir, name).isDirectory();
+            }
+        };
 
     /** Returns a list of the names of all plain files in the directory DIR, in
      *  lexicographic order as Java Strings.  Returns null if DIR does

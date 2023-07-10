@@ -141,7 +141,7 @@ public class Index implements Serializable {
 
         Map<File, Blob> tracked = getCurrentCommit().getBlobs();
 
-        status.append("\n=== Modifications Not Staged for Commit ===\n");
+        status.append("\n=== Modifications Not Staged For Commit ===\n");
         Set<String> modifiedSet = new HashSet<String>();
         for (File f : tracked.keySet()) {
             if (!f.exists() && !isRemoved(f)) {

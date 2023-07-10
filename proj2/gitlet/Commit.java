@@ -78,7 +78,8 @@ public class Commit implements Serializable {
         // Update the current working branch.
         Branch b = getCurrentBranch();
         b.setCommit(this);
-        writeContents(b.getLogFile(), this.toString() + "\n" + readContentsAsString(b.getLogFile()));
+        writeContents(b.getLogFile(),
+                this.toString() + "\n" + readContentsAsString(b.getLogFile()));
     }
 
     /** Checks the staging area to validate commit eligibility. */
