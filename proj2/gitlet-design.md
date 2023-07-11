@@ -155,6 +155,12 @@ After finding the corresponding blob, ***the current existing file will be overw
 
 > *Checking out a certain branch is not implemented yet.*
 
+### reset
+
+The `reset` command utilizes the `Commit.find(String commitID)` method to find the desired `Commit` object, during which **if no commit with the given id exists**, the program exits with `No commit with that id exists.`; then it checks whether there is **untracked file(s) under the current branch** which would be dangerous if overwritten, also exits with `There is an untracked file in the way; delete it, or add and commit it first.`
+
+As long as all checks are done, ***iterate through all blobs*** under the `Commit` object we've got, and perform `overwrite` methods on each of them, just like that in `checkout`. At the end, moves the current branch's head to that commit node and clear the staging area. *(when moving the head pointer, the existing log file is also modified correspondingly)*
+
 ## Persistence
 
 Structure of the `.gitlet` repository *(temporarily built until now)*:
