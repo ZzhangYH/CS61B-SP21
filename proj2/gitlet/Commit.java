@@ -145,6 +145,22 @@ public class Commit implements Serializable {
         return commit;
     }
 
+    /** Deletes all the files (not the blobs) tracked by the commit.
+     *  The parameter is for checking whether any untracked files would be overwritten. */
+    public void deleteTrackedFiles(Commit commit) {
+        getIndex().checkUntracked(commit);
+        for (Blob b : blobs.values()) {
+            b.delete();
+        }
+    }
+
+    /** Overwrites all the files (not the blobs) tracked by the commit. */
+    public void overwriteTrackedFiles() {
+        for (Blob b : blobs.values()) {
+            b.overwrite();
+        }
+    }
+
     /** Returns whether the specified file is tracked by the commit. */
     public boolean isTracked(File file) {
         return this.blobs.containsKey(file);

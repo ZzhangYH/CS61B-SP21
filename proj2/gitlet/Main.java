@@ -74,6 +74,11 @@ public class Main {
      *      Creates a new branch with the given name, and points it at the current head commit.
      *      This command does NOT immediately switch to the newly created branch.
      *
+     *  rm-branch <branch name> --
+     *      Deletes the branch with the given name. This only means to delete the pointer
+     *      associated with the branch; it does not mean to delete all commits that were created
+     *      under the branch, or anything like that.
+     *
      *  reset <commit id> --
      *      Checks out all the files tracked by the given commit. Removes tracked files that are
      *      not present in that commit. Also moves the current branch’s head to that commit node.
@@ -125,6 +130,10 @@ public class Main {
             case "branch":
                 validate(args, 2);
                 Repository.branch(args[1]);
+                break;
+            case "rm-branch":
+                validate(args, 2);
+                Repository.rmBranch(args[1]);
                 break;
             case "reset":
                 validate(args, 2);

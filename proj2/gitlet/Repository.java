@@ -1,7 +1,6 @@
 package gitlet;
 
 import java.io.File;
-import java.util.List;
 
 import static gitlet.Utils.*;
 
@@ -140,11 +139,8 @@ public class Repository {
         if (branchName.equals(getCurrentBranch().getName())) {
             exit("No need to checkout the current branch.");
         }
-        Branch b = Branch.find(branchName);
-        getIndex().checkUntracked();
-        for (Blob blob : getCurrentCommit().getBlobs().values()) {
-            blob.delete();
-        }
+        Branch b = Branch.find(branchName, 1);
+        getCurrentCommit().deleteTrackedFiles(b.getCommit());
         writeContents(HEAD, b.getPath().toString());
         reset(getCurrentCommit().getUID());
     }
@@ -155,13 +151,21 @@ public class Repository {
         b.sync(getCurrentBranch());
     }
 
+    /** Deletes the branch with the given name. */
+    public static void rmBranch(String branchName) {
+        // Checks if the specified branch is the current branch.
+        if (branchName.equals(getCurrentBranch().getName())) {
+            exit("Cannot remove the current branch.");
+        }
+        Branch b = Branch.find(branchName, 2);
+        b.remove();
+    }
+
     /** Resets all the files tracked and the branch's head pointer by the given commit. */
     public static void reset(String commitID) {
-        getIndex().checkUntracked();
         Commit c = Commit.find(commitID);
-        for (Blob b : c.getBlobs().values()) {
-            b.overwrite();
-        }
+        getCurrentCommit().deleteTrackedFiles(c);
+        c.overwriteTrackedFiles();
         getCurrentBranch().setCommit(c);
         getIndex().clear();
     }

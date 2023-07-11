@@ -81,10 +81,12 @@ public class Index implements Serializable {
     }
 
     /** Checks if there is any untracked file(s) that would be overwritten. */
-    public void checkUntracked() {
-        if (getUntracked().length != 0) {
-            exit("There is an untracked file in the way; " +
-                    "delete it, or add and commit it first.");
+    public void checkUntracked(Commit commit) {
+        for (String s : getUntracked()) {
+            if (commit.isTracked(join(CWD, s))) {
+                exit("There is an untracked file in the way; " +
+                        "delete it, or add and commit it first.");
+            }
         }
     }
 

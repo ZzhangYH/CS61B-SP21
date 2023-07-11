@@ -41,6 +41,16 @@ public class Branch implements Serializable {
         writeObject(this.getRefFile(), this);
     }
 
+    /** Deletes the branch references. */
+    public void remove() {
+        if (getRefFile().exists()) {
+            getRefFile().delete();
+        }
+        if (getLogFile().exists()) {
+            getLogFile().delete();
+        }
+    }
+
     /** Synchronizes the branch with the specified branch history. */
     public void sync(Branch branch) {
         this.commit = branch.getCommit();
@@ -80,7 +90,7 @@ public class Branch implements Serializable {
     }
 
     /** Returns the Branch object of the specified branch name. */
-    public static Branch find(String branchName) {
+    public static Branch find(String branchName, int key) {
         Branch branch = null;
         for (Branch b : findAll()) {
             if (branchName.equals(b.getName())) {
@@ -89,8 +99,10 @@ public class Branch implements Serializable {
             }
         }
         // If no branch with that name exists.
-        if (branch == null) {
+        if (branch == null && key == 1) {
             exit("No such branch exists.");
+        } else if (branch == null && key == 2) {
+            exit("A branch with that name does not exist.");
         }
         return branch;
     }

@@ -165,6 +165,12 @@ Following checks are performed before any files are touched:
 This command simply creates a new `Branch` object with the given name, and *synchronizes it with the current branch (including commits and logs)* using `sync(Branch branch)` method.
 - **If a branch with the given name already exists**, print `A branch with that name already exists.`
 
+### rm-branch
+
+The `rm-branch` command is also simple. Conducts the following failure tests and finds the desired `Branch` object. Then just ***delete*** the related `ref` & `log` files, and, phew, done!
+- **If a branch with the given name does not exist**, print `A branch with that name does not exist.`
+- **If you try to remove the branch you’re currently on**, print `Cannot remove the current branch.`
+
 ### reset
 
 The `reset` command utilizes the `Commit.find(String commitID)` method to find the desired `Commit` object, during which **if no commit with the given id exists**, the program exits with `No commit with that id exists.`; then it checks whether there is **untracked file(s) under the current branch** which would be dangerous if overwritten, also exits with `There is an untracked file in the way; delete it, or add and commit it first.`
