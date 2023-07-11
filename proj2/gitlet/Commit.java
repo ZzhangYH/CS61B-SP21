@@ -131,30 +131,18 @@ public class Commit implements Serializable {
 
     /** Returns the Commit object of the specified UID (or abbreviation). */
     public static Commit find(String commitID) {
-        String id1 = commitID.substring(0, 2);
-        String id2 = commitID.substring(2);
-        File dir = join(OBJECTS_DIR, id1);
-        // Checks whether the folder of commit exists.
-        if (!dir.exists()) {
-            exit("No commit with that id exists.");
-        }
-        // Checks whether the exact commit UID exists.
-        List<String> fullIDs = plainFilenamesIn(dir);
-        if (fullIDs == null) {
-            exit("No commit with that id exists.");
-        }
-        String fullID = null;
-        for (String id : fullIDs) {
-            if (id.startsWith(id2)) {
-                fullID = id;
+        Commit commit = null;
+        for (Commit c : findAll()) {
+            if (c.getUID().startsWith(commitID)) {
+                commit = c;
                 break;
             }
         }
-        if (fullID == null) {
+        // If no commit with the given id exists.
+        if (commit == null) {
             exit("No commit with that id exists.");
         }
-        File f = join(OBJECTS_DIR, id1, fullID);
-        return readObject(f, Commit.class);
+        return commit;
     }
 
     /** Returns whether the specified file is tracked by the commit. */

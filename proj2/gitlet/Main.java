@@ -70,6 +70,10 @@ public class Main {
      *          if they exist. Also, at the end of this command, the given branch will now be
      *          considered the current branch.
      *
+     *  branch <branch name> --
+     *      Creates a new branch with the given name, and points it at the current head commit.
+     *      This command does NOT immediately switch to the newly created branch.
+     *
      *  reset <commit id> --
      *      Checks out all the files tracked by the given commit. Removes tracked files that are
      *      not present in that commit. Also moves the current branch’s head to that commit node.
@@ -117,6 +121,10 @@ public class Main {
                 break;
             case "checkout":
                 checkout(args);
+                break;
+            case "branch":
+                validate(args, 2);
+                Repository.branch(args[1]);
                 break;
             case "reset":
                 validate(args, 2);

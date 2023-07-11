@@ -153,7 +153,17 @@ After finding the corresponding blob, ***the current existing file will be overw
 
 3. `java gitlet.Main checkout [branch name]`
 
-> *Checking out a certain branch is not implemented yet.*
+For this command, the program firstly finds the `Branch` object with the specified name given. Then **deletes all file tracked by the current commit** *before switching the new branch*, **checks-out the new branch** by overwriting the `HEAD` file, and in the end calls the `reset` command *(also clears the staging area for us)* to **restore all files** in the latest commit of the new branch.
+
+Following checks are performed before any files are touched:
+- **If no branch with that name exists**, print `No such branch exists.`
+- **If that branch is the current branch**, print `No need to checkout the current branch.`
+- **If a working file is untracked in the current branch and would be overwritten by the checkout**, print `There is an untracked file in the way; delete it, or add and commit it first.`
+
+### branch
+
+This command simply creates a new `Branch` object with the given name, and *synchronizes it with the current branch (including commits and logs)* using `sync(Branch branch)` method.
+- **If a branch with the given name already exists**, print `A branch with that name already exists.`
 
 ### reset
 

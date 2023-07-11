@@ -31,6 +31,13 @@ public class Blob implements Serializable {
         }
     }
 
+    /** Deletes the file of the blob. */
+    public void delete() {
+        if (path.exists()) {
+            path.delete();
+        }
+    }
+
     /** Overwrites the file contents with the version of the blob. */
     public void overwrite() {
         try {

@@ -1,6 +1,7 @@
 package gitlet;
 
 import java.io.File;
+import java.util.List;
 
 import static gitlet.Utils.*;
 
@@ -135,17 +136,29 @@ public class Repository {
     /** Takes all files in the commit at the head of the given branch,
      *  and overwrites the versions of the files that are already there. */
     public static void checkoutBranch(String branchName) {
-        exit("Not implemented yet.");
+        // Checks if the specified branch is the current branch.
+        if (branchName.equals(getCurrentBranch().getName())) {
+            exit("No need to checkout the current branch.");
+        }
+        Branch b = Branch.find(branchName);
+        getIndex().checkUntracked();
+        for (Blob blob : getCurrentCommit().getBlobs().values()) {
+            blob.delete();
+        }
+        writeContents(HEAD, b.getPath().toString());
+        reset(getCurrentCommit().getUID());
+    }
+
+    /** Creates a new branch with the given name, and points it at the current head commit.  */
+    public static void branch(String branchName) {
+        Branch b = new Branch(branchName);
+        b.sync(getCurrentBranch());
     }
 
     /** Resets all the files tracked and the branch's head pointer by the given commit. */
     public static void reset(String commitID) {
+        getIndex().checkUntracked();
         Commit c = Commit.find(commitID);
-        // A working file is untracked in the current branch.
-        if (getIndex().getUntracked().length != 0) {
-            exit("There is an untracked file in the way; " +
-                    "delete it, or add and commit it first.");
-        }
         for (Blob b : c.getBlobs().values()) {
             b.overwrite();
         }

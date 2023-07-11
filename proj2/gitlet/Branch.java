@@ -3,6 +3,7 @@ package gitlet;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.*;
 
 import static gitlet.Utils.*;
 import static gitlet.Repository.*;
@@ -25,12 +26,26 @@ public class Branch implements Serializable {
         this.name = name;
         this.path = join("refs", "heads", this.name);
         try {
-            this.getRefFile().createNewFile();
-            this.getLogFile().createNewFile();
+            // Checks if a branch with the given name already exists.
+            if (!getRefFile().createNewFile() || !getLogFile().createNewFile()) {
+                exit("A branch with that name already exists.");
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        save();
+    }
+
+    /** Updates and writes to the Branch object. */
+    public void save() {
         writeObject(this.getRefFile(), this);
+    }
+
+    /** Synchronizes the branch with the specified branch history. */
+    public void sync(Branch branch) {
+        this.commit = branch.getCommit();
+        writeContents(this.getLogFile(), readContents(branch.getLogFile()));
+        save();
     }
 
     /** Updates the branch with the latest commit and save it. */
@@ -48,7 +63,36 @@ public class Branch implements Serializable {
             writeContents(getLogFile(),
                     "===\ncommit " + log.substring(log.indexOf(id)));
         }
-        writeObject(this.getRefFile(), this);
+        save();
+    }
+
+    /** Finds all the existing branches and returns them as a set. */
+    public static Set<Branch> findAll() {
+        File dir = join(REFS_DIR, "heads");
+        List<String> branchNames = plainFilenamesIn(dir);
+        Set<Branch> branches = new HashSet<>();
+        if (branchNames != null) {
+            for (String name : branchNames) {
+                branches.add(readObject(join(dir, name), Branch.class));
+            }
+        }
+        return branches;
+    }
+
+    /** Returns the Branch object of the specified branch name. */
+    public static Branch find(String branchName) {
+        Branch branch = null;
+        for (Branch b : findAll()) {
+            if (branchName.equals(b.getName())) {
+                branch = b;
+                break;
+            }
+        }
+        // If no branch with that name exists.
+        if (branch == null) {
+            exit("No such branch exists.");
+        }
+        return branch;
     }
 
     /** Return the name of the branch. */

@@ -80,6 +80,14 @@ public class Index implements Serializable {
         return !Arrays.equals(oldFile, newFile);
     }
 
+    /** Checks if there is any untracked file(s) that would be overwritten. */
+    public void checkUntracked() {
+        if (getUntracked().length != 0) {
+            exit("There is an untracked file in the way; " +
+                    "delete it, or add and commit it first.");
+        }
+    }
+
     /** Returns whether the specified file is staged for addition. */
     public boolean isStaged(File file) {
         return staged.containsKey(file);
