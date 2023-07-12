@@ -87,6 +87,10 @@ Notes taken when auditing CS 61B, please refer to the original slides and lectur
     - [Hash Table: Handling Collisions](#hash-table-handling-collisions)
     - [Hash Table Performance](#hash-table-performance)
     - [Hash Table in Java](#hash-table-in-java)
+- [Week 8](#week-8)
+  - [Lecture 20: Heaps and Priority Queues](#lecture-20-heaps-and-priority-queues)
+    - [Heap](#heap)
+    - [Tree Representations](#tree-representations)
 
 </details>
 
@@ -1211,6 +1215,97 @@ A typical hash code base is a ***small prime***
   - Lower chance of resulting `hashCode()` having a bad relationship with the number of buckets
 - Why small?
   - Lower cost to compute
+
+## Week 8
+
+[`Lab8`](https://sp21.datastructur.es/materials/lab/lab8/lab8)
+
+### Lecture 20: Heaps and Priority Queues
+
+#### Heap
+
+`Binary min-heap` Binary tree that is ***complete*** and obeys ***min-heap property***
+- **Min-heap:** Every node is less than or equal to both of its children
+- **Complete:** Missing items only at the bottom level (if any), all nodes are so far left as possible
+
+Given a heap, implement **Priority Queue** operations
+- `add(x)` place the new employee in the last position, and promote as high as possible
+- `getSmallest()` return the item in the root node
+- `removeSmallest()` assassinate the president (of the company), promote the rightmost person in the company to president. Then demote repeatedly, always taking the ‘better’ successor
+
+#### Tree Representations
+
+Representing a tree in Java: 
+
+- Approach 1: **Creating mapping from node to children**
+
+  - 1a: *Fixed-width nodes*
+
+    ```java
+    public class Tree1A<Key> {
+        Key k;
+        Tree1A left;
+        Tree1A middle;
+        Tree1A right;
+    }
+    ```
+
+  - 1b: *Variable-width nodes*
+
+    ```java
+    public class Tree1B<Key> {
+        Key k;
+        Tree1B[] children;
+    }
+    ```
+
+  - 1c: *Sibling tree*
+
+    ```java
+    public class Tree1C<Key> {
+        Key k;
+        Tree1C favoredChild;
+        Tree1C sibling;
+    }
+    ```
+
+- Approach 2: **Store keys in an array, and parentIDs in another array**
+
+  - Similar to what we did with *Disjoint Sets*
+
+    ```java
+    public class Tree2<Key> {
+        Key[] keys;
+        int[] parents;
+    }
+    ```
+
+- Approach 3: **Store keys in an array, don't store structure anywhere**
+
+  - 3a: *Simply assume tree is complete*
+
+    ```java
+    public class Tree3<Key> {
+        Key[] keys;
+    }
+    ```
+
+  - 3b (book implementation): *Offset everything by 1 spot, makes computation of children/parents nicer*
+    - `leftChild(k) = k * 2`
+    - `rightChild(k) = k * 2 + 1`
+    - `parent(k) = k / 2`
+
+Heap implementation of a Priority Queue
+- Why *Priority Queue*? Think of position in tree as its "priority"
+- Heap is $\log N$ time **AMORTIZED**
+- Heap handle duplicate priorities much more naturally than BSTs
+- Array based heaps take less memory *(very roughly about 1/3 the memory of representing a tree with approach 1a)*
+
+|                  | Ordered Array | Bushy BST         | Hash Table   | Heap              |
+| ---------------- | ------------- | ----------------- | ------------ | ----------------- |
+| `add`            | $\Theta (N)$  | $\Theta (\log N)$ | $\Theta (1)$ | $\Theta (\log N)$ |
+| `getSmallest`    | $\Theta (1)$  | $\Theta (\log N)$ | $\Theta (N)$ | $\Theta (1)$      |
+| `removeSmallest` | $\Theta (N)$  | $\Theta (\log N)$ | $\Theta (N)$ | $\Theta (\log N)$ |
 
 
 
