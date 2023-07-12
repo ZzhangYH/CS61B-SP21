@@ -29,5 +29,5 @@ List of projects in the course and my stats:
 - [x] [Lab 4B: Git Exercise Part B](https://sp21.datastructur.es/materials/lab/lab4/lab4)
 - [x] [Lab 6: Getting Started on Project 2](https://sp21.datastructur.es/materials/lab/lab6/lab6)
 - [x] [Lab 7: BST Map](https://sp21.datastructur.es/materials/lab/lab7/lab7)
-- [ ] [Lab 8: Hash Map](https://sp21.datastructur.es/materials/lab/lab8/lab8)
+- [x] [Lab 8: Hash Map](https://sp21.datastructur.es/materials/lab/lab8/lab8)
 - [ ] [Lab 12: Getting Started on Project 3](https://sp21.datastructur.es/materials/lab/lab12/lab12)
