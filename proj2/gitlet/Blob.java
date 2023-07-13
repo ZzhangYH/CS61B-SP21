@@ -48,6 +48,11 @@ public class Blob implements Serializable {
         writeContents(path, contents);
     }
 
+    /** Returns whether the file is modified in the specified commit. */
+    public boolean isModifiedIn(Commit commit) {
+        return this.equals(commit.getBlob(path));
+    }
+
     /** Returns the name of the blob. */
     public String getName() {
         return this.name;

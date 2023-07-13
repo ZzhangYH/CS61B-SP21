@@ -100,6 +100,11 @@ public class Index implements Serializable {
         return removed.containsKey(file);
     }
 
+    /** Returns whether the staging area is cleared. */
+    public boolean isClear() {
+        return staged.keySet().size() == 0 && removed.keySet().size() == 0;
+    }
+
     /** Returns the map of the staged blobs. */
     public Map<File, Blob> getStaged() {
         return this.staged;

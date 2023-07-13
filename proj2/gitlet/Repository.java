@@ -170,6 +170,20 @@ public class Repository {
         getIndex().clear();
     }
 
+    /** Merges files from the given branch into the current branch. */
+    public static void merge(String branchName) {
+        // Checks if attempting to merge a branch with itself.
+        if (branchName.equals(getCurrentBranch().getName())) {
+            exit("Cannot merge a branch with itself.");
+        }
+        // If there are staged additions or removals present.
+        if (getIndex().isClear()) {
+            exit("You have uncommitted changes.");
+        }
+        Branch other = Branch.find(branchName, 2);
+        Merge.merge(getCurrentBranch(), other);
+    }
+
     /** Returns the object of the current working branch. */
     public static Branch getCurrentBranch() {
         return readObject(join(GITLET_DIR, readContentsAsString(HEAD)), Branch.class);

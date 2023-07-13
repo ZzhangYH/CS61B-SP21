@@ -83,6 +83,9 @@ public class Main {
      *      Checks out all the files tracked by the given commit. Removes tracked files that are
      *      not present in that commit. Also moves the current branch’s head to that commit node.
      *
+     *  merge <branch name> --
+     *      Merges files from the given branch into the current branch.
+     *
      */
     public static void main(String[] args) {
         // No input arguments.
@@ -138,6 +141,10 @@ public class Main {
             case "reset":
                 validate(args, 2);
                 Repository.reset(args[1]);
+                break;
+            case "merge":
+                validate(args, 2);
+                Repository.merge(args[1]);
                 break;
             default:
                 exit("No command with that name exists.");

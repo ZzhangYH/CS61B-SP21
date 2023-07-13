@@ -114,6 +114,22 @@ public class Commit implements Serializable {
         return commits;
     }
 
+    /** Returns the Commit object of the specified UID (or abbreviation). */
+    public static Commit find(String commitID) {
+        Commit commit = null;
+        for (Commit c : findAll()) {
+            if (c.getUID().startsWith(commitID)) {
+                commit = c;
+                break;
+            }
+        }
+        // If no commit with the given id exists.
+        if (commit == null) {
+            exit("No commit with that id exists.");
+        }
+        return commit;
+    }
+
     /** Finds the ids of all commits with the specified message and returns as a set. */
     public static Set<String> findId(String message) {
         Set<Commit> commits = findAll();
@@ -129,20 +145,23 @@ public class Commit implements Serializable {
         return ids;
     }
 
-    /** Returns the Commit object of the specified UID (or abbreviation). */
-    public static Commit find(String commitID) {
-        Commit commit = null;
-        for (Commit c : findAll()) {
-            if (c.getUID().startsWith(commitID)) {
-                commit = c;
-                break;
+    /** Traces back two commits and find the splitting point where they diverge. */
+    public static Commit findSplitPoint(Commit current, Commit other) {
+        Commit currentTemp = current;
+        while (true) {
+            Commit otherTemp = other;
+            while (otherTemp != null) {
+                if (currentTemp.equals(otherTemp)) {
+                    return currentTemp;
+                }
+                otherTemp = otherTemp.getParent();
+            }
+            if (currentTemp.getParent() != null) {
+                currentTemp = currentTemp.getParent();
+            } else {
+                return currentTemp;
             }
         }
-        // If no commit with the given id exists.
-        if (commit == null) {
-            exit("No commit with that id exists.");
-        }
-        return commit;
     }
 
     /** Deletes all the files (not the blobs) tracked by the commit.
