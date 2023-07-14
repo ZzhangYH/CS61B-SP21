@@ -20,7 +20,7 @@ public class Merge {
         // Finds and checks the split commit.
         Commit currentCommit = current.getCommit();
         Commit otherCommit = other.getCommit();
-        Commit splitCommit = Commit.findSplitPoint(currentCommit, otherCommit);
+        Commit splitCommit = findSplitPoint(currentCommit, otherCommit);
         if (splitCommit.getUID().equals(otherCommit.getUID())) {
             exit("Given branch is an ancestor of the current branch.");
         }
@@ -54,6 +54,8 @@ public class Merge {
         Map<File, Blob> merged = new HashMap<>();
         // Checked files set.
         Set<File> checked = new HashSet<>();
+        // Merge conflict flag.
+        boolean flag = false;
 
         for (Blob b : all.values()) {
             // Records and checks file consistency.
@@ -83,15 +85,34 @@ public class Merge {
                 if (!b.isIn(current) && b.isIn(other) && !b.isModifiedIn(split, other)) {
                     continue;
                 }
-                // Puts the blob in merged if modified in both current and other the same way.
-                if (b.isIn(current) && b.isIn(other) && !b.isModifiedIn(current, other)) {
-                    merged.put(f, b);
-                    continue;
+                // Blob is in split, current, and other.
+                if (b.isIn(current) && b.isIn(other)) {
+                    // Modified in current and other the same way.
+                    if (!b.isModifiedIn(current, other)) {
+                        merged.put(f, b);
+                        continue;
+                    }
+                    // Modified in other, but not current.
+                    if (!b.isModifiedIn(split, current)) {
+                        merged.put(f, other.get(b.getPath()));
+                        continue;
+                    }
+                    // Modified in current, but not other.
+                    if (!b.isModifiedIn(split, other)) {
+                        merged.put(f, current.get(b.getPath()));
+                        continue;
+                    }
                 }
             }
 
             // Remaining blob encounters merge conflict.
+            flag = true;
             merged.put(f, mergeConflict(b, current, other));
+        }
+
+        // Prints conflict message if conflict occurs.
+        if (flag) {
+            System.out.println("Encountered a merge conflict.");
         }
 
         return merged;
@@ -121,9 +142,39 @@ public class Merge {
         }
         byte[] mergeContents = str.toByteArray();
 
-        // Prints conflict message and returns the merged blob.
-        System.out.println("Encountered a merge conflict.");
+        // Returns the merged blob.
         return new Blob(blob.getName(), blob.getPath(), mergeContents);
+    }
+
+    /** Returns the split commit which is the latest common ancestor of two specified commits. */
+    private static Commit findSplitPoint(Commit current, Commit other) {
+        // Gets the commit map for both branches.
+        Map<String, Integer> currentMap = new HashMap<>();
+        traceBackCommit(current, currentMap, 0);
+        Map<String, Integer> otherMap = new HashMap<>();
+        traceBackCommit(other, otherMap, 0);
+
+        // Finds the latest common ancestor.
+        String minCommitID = null;
+        int minDepth = currentMap.size();
+        for (String commitID : currentMap.keySet()) {
+            int depth = currentMap.get(commitID);
+            if (otherMap.containsKey(commitID) && depth < minDepth) {
+                minCommitID = commitID;
+                minDepth = depth;
+            }
+        }
+        return Commit.find(minCommitID);
+    }
+
+    /** Recursively adds commitIDs into the commit map with its depth. */
+    private static void traceBackCommit(Commit commit, Map<String, Integer> map, int depth) {
+        if (commit == null) {
+            return;
+        }
+        map.put(commit.getUID(), depth);
+        traceBackCommit(commit.getParent(), map, depth + 1);
+        traceBackCommit(commit.getMergeParent(), map, depth + 1);
     }
 
 }

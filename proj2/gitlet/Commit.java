@@ -158,25 +158,6 @@ public class Commit implements Serializable {
         return ids;
     }
 
-    /** Traces back two commits and find the splitting point where they diverge. */
-    public static Commit findSplitPoint(Commit current, Commit other) {
-        Commit currentTemp = current;
-        while (true) {
-            Commit otherTemp = other;
-            while (otherTemp != null) {
-                if (currentTemp.UID.equals(otherTemp.UID)) {
-                    return currentTemp;
-                }
-                otherTemp = otherTemp.getParent();
-            }
-            if (currentTemp.getParent() != null) {
-                currentTemp = currentTemp.getParent();
-            } else {
-                return currentTemp;
-            }
-        }
-    }
-
     /** Deletes all the files (not the blobs) tracked by the commit.
      *  The parameter is for checking whether any untracked files would be overwritten. */
     public void deleteTrackedFiles(Commit commit) {
@@ -216,6 +197,11 @@ public class Commit implements Serializable {
     /** Returns the parent of the commit. */
     public Commit getParent() {
         return this.parent;
+    }
+
+    /** Returns the merged (second) parent of the commit. */
+    public Commit getMergeParent() {
+        return this.mergeParent;
     }
 
     /** Returns the UID of the commit. */
