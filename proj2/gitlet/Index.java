@@ -66,6 +66,17 @@ public class Index implements Serializable {
 
     /** Clears the staging area and stages all files in the merged map. */
     public void merge(Map<File, Blob> merged) {
+        // Checks if any untracked file(s) would be overwritten.
+        for (String s : getUntracked()) {
+            if (merged.containsKey(join(CWD, s))) {
+                exit("There is an untracked file in the way; " +
+                        "delete it, or add and commit it first.");
+            }
+        }
+        // Deletes all the files (not the blobs) currently tracked.
+        for (Blob b : getCurrentCommit().getBlobs().values()) {
+            b.delete();
+        }
         clear();
         staged.putAll(merged);
         save();

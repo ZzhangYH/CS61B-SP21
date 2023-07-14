@@ -31,6 +31,13 @@ public class Blob implements Serializable {
         }
     }
 
+    /** Constructor, creates a blob with the specified contents. */
+    public Blob(String name, File path, byte[] contents) {
+        this.name = name;
+        this.path = path;
+        this.contents = contents;
+    }
+
     /** Deletes the file of the blob. */
     public void delete() {
         if (path.exists()) {

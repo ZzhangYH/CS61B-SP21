@@ -1,6 +1,9 @@
 package gitlet;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import static gitlet.Utils.*;
@@ -17,29 +20,25 @@ public class Merge {
         // Finds and checks the split commit.
         Commit currentCommit = current.getCommit();
         Commit otherCommit = other.getCommit();
-        Commit split = Commit.findSplitPoint(currentCommit, otherCommit);
-        if (split.equals(otherCommit)) {
+        Commit splitCommit = Commit.findSplitPoint(currentCommit, otherCommit);
+        if (splitCommit.getUID().equals(otherCommit.getUID())) {
             exit("Given branch is an ancestor of the current branch.");
         }
-        if (split.equals(currentCommit)) {
+        if (splitCommit.getUID().equals(currentCommit.getUID())) {
             checkoutBranch(other.getName());
             exit("Current branch fast-forwarded.");
         }
 
-        Map<File, Blob> currentFiles = current.getCommit().getBlobs();
-        Map<File, Blob> otherFiles = other.getCommit().getBlobs();
-        Map<File, Blob> splitFile = split.getBlobs();
+        // Required maps for the merge operation.
+        Map<File, Blob> currentFiles = currentCommit.getBlobs();
+        Map<File, Blob> otherFiles = otherCommit.getBlobs();
+        Map<File, Blob> splitFiles = splitCommit.getBlobs();
+        Map<File, Blob> mergedFiles = mergeFiles(currentFiles, otherFiles, splitFiles);
 
-        // Final version of files after merge.
-        Map<File, Blob> merged = mergeFiles(currentFiles, otherFiles, splitFile);
-        getIndex().merge(merged);
-
-        // Commits the merge and updates all files.
+        // Updates the staging area, commits the merge, and updates all files.
+        getIndex().merge(mergedFiles);
         Commit mergeCommit = new Commit(current, other);
         mergeCommit.commit();
-        for (File f : currentFiles.keySet()) {
-            f.delete();
-        }
         reset(mergeCommit.getUID());
     }
 
@@ -56,9 +55,7 @@ public class Merge {
         // Checked files set.
         Set<File> checked = new HashSet<>();
 
-        // Iterates through all the blobs.
         for (Blob b : all.values()) {
-
             // Records and checks file consistency.
             File f = b.getPath();
             if (checked.contains(f)) {
@@ -66,59 +63,67 @@ public class Merge {
             }
             checked.add(f);
 
-            /* --- Only one occurrence --- */
-            // Blob is only in current and not in other.
-            if (!b.isIn(split) && b.isIn(current) && !b.isIn(other)) {
-//                System.out.println(b.getName() + " is only in current.");
-                merged.put(b.getPath(), b);
-                continue;
-            }
-            // Blob is only in other and not in current.
-            if (!b.isIn(split) && !b.isIn(current) && b.isIn(other)) {
-//                System.out.println(b.getName() + " is only in other.");
-                merged.put(b.getPath(), b);
-                continue;
-            }
-            /* --- Only one occurrence --- */
-
-            /* --- Two occurrences --- */
-            // Blob is unmodified in current but not present in other.
-            if (!b.isIn(other) && !b.isModifiedIn(split, current)) {
-//                System.out.println(b.getName() + " is unmodified in current.");
-                continue;
-            }
-            // Blob is unmodified in other but not present in current.
-            if (!b.isIn(current) && !b.isModifiedIn(split, other)) {
-//                System.out.println(b.getName() + " is unmodified in other.");
-                continue;
-            }
-            /* --- Two occurrences --- */
-
-            /* --- Three occurrences --- */
-            // Blob is NOT modified in both current and other.
-            if (!(b.isModifiedIn(split, current) && b.isModifiedIn(split, other))) {
-                merged.put(b.getPath(), b);
-                continue;
-            }
-            // Blob is modified in both current and other.
-            else {
-                Blob currentBlob = current.get(b.getPath());
-                Blob otherBlob = other.get(b.getPath());
-                // Modified in the same way.
-                if (currentBlob.equals(otherBlob)) {
-                    merged.put(b.getPath(), b);
+            // Blob that is not present in the split commit.
+            if (!b.isIn(split)) {
+                // Puts the blob in merged
+                // except that it is modified in both current and other in different ways.
+                if (!(b.isIn(current) && b.isIn(other) && b.isModifiedIn(current, other))) {
+                    merged.put(f, b);
                     continue;
                 }
-                // Merge conflict.
-                else {
-                    exit("Encountered a merge conflict.");
+            }
+
+            // Blob that is in the split commit.
+            if (b.isIn(split)) {
+                // Skips the blob: Unmodified in current but not present in other.
+                if (b.isIn(current) && !b.isIn(other) && !b.isModifiedIn(split, current)) {
+                    continue;
+                }
+                // Skips the blob: Unmodified in other but not present in current.
+                if (!b.isIn(current) && b.isIn(other) && !b.isModifiedIn(split, other)) {
+                    continue;
+                }
+                // Puts the blob in merged if modified in both current and other the same way.
+                if (b.isIn(current) && b.isIn(other) && !b.isModifiedIn(current, other)) {
+                    merged.put(f, b);
+                    continue;
                 }
             }
-            /* --- Three occurrences --- */
 
-        } // End of for loop.
+            // Remaining blob encounters merge conflict.
+            merged.put(f, mergeConflict(b, current, other));
+        }
 
         return merged;
+    }
+
+    /** Handles the merge conflict and returns the merged blob. */
+    private static Blob mergeConflict(Blob blob, Map<File, Blob> current, Map<File, Blob> other) {
+        // Gets the blob contents (empty byte array if null).
+        Blob currentBlob = current.get(blob.getPath());
+        Blob otherBlob = other.get(blob.getPath());
+        byte[] currentContents = currentBlob == null ? new byte[0] : currentBlob.getContents();
+        byte[] otherContents = otherBlob == null ? new byte[0] : otherBlob.getContents();
+
+        // Formats the conflict.
+        byte[] head = "<<<<<<< HEAD\n".getBytes(StandardCharsets.UTF_8);
+        byte[] body = "=======\n".getBytes(StandardCharsets.UTF_8);
+        byte[] feet = ">>>>>>>\n".getBytes(StandardCharsets.UTF_8);
+        ByteArrayOutputStream str = new ByteArrayOutputStream( );
+        try {
+            str.write(head);
+            str.write(currentContents);
+            str.write(body);
+            str.write(otherContents);
+            str.write(feet);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        byte[] mergeContents = str.toByteArray();
+
+        // Prints conflict message and returns the merged blob.
+        System.out.println("Encountered a merge conflict.");
+        return new Blob(blob.getName(), blob.getPath(), mergeContents);
     }
 
 }
