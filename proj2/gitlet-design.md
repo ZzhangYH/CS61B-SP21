@@ -62,12 +62,15 @@ This class represents a `Commit` in our gitlet repository. Each commit is **iden
 1. `private Map<File, Blob> blobs` Map of file to the Blob contents of the commit.
 2. `private final String message` Message of the commit.
 3. `private final Date date` Timestamp of the commit.
-4. `private Commit parent` Not implemented yet.
-5. `private String UID` 40-character SHA-1 id of the commit.
+4. `private Commit parent` Parent of the commit.
+5. `private final Commit mergeParent` Merged parent of the commit.
+6. `private String UID` 40-character SHA-1 id of the commit.
 
 `Default Constructor`: Sets the ***initial commit*** with **message** `initial commit`, **timestamp** of `00:00:00 UTC, Thursday, 1 January 1970`, **parent** of `null`, and **empty blobs**.
 
-`Constructor` Sets the **message**, **time**, **parent** which *is the last commit*, and copies all blobs from the parent.
+`Normal Constructor` Sets the **message**, **time**, **parent** which *is the last commit*, and copies all blobs from the parent.
+
+`Merge Constructor` Takes in two `Branch` objects, sets the `parent` and `mergeParent` accordingly and commit message to be `Merged [given branch name] into [current branch name].` Then takes everything staged for addition in the staging area to be in the `blobs`.
 
 ### Blob
 
@@ -79,7 +82,9 @@ A blob holds the detailed information of a file in the repository. It helps comm
 2. `private final File path` Absolute path to the file of this blob.
 3. `private final byte[] contents` Contents in the file of this blob.
 
-`Constructor` Sets the **name** and **path** of the blob taken from the parameter and **reads the file contents** (`contents` will be `null` is the file does not exist).
+`Default Constructor` Sets the **name** and **path** of the blob taken from the parameter and **reads the file contents** (`contents` will be `null` is the file does not exist).
+
+`Merge Constructor` Sets **name** and **path** alike the default one, but it sets the **contents** our program specifies *(merge conflicts handling)* instead of reading from file.
 
 All instance variables are all `final` because once the `Blob` is generated there won't be changes to it. ***Any modifications*** to the file contents will generate a **new** `Blob` to be tracked.
 
@@ -177,9 +182,51 @@ The `reset` command utilizes the `Commit.find(String commitID)` method to find t
 
 As long as all checks are done, ***iterate through all blobs*** under the `Commit` object we've got, and perform `overwrite` methods on each of them, just like that in `checkout`. At the end, moves the current branch's head to that commit node and clear the staging area. *(when moving the head pointer, the existing log file is also modified correspondingly)*
 
+### merge
+
+This `merge` command is a lot more complicated than the previous one. Initially gets the `Branch` object specified and checks:
+- **If attempting to merge a branch with itself**, print `Cannot merge a branch with itself.`
+- **If there are staged additions or removals present**, print `You have uncommitted changes.`
+- **If a branch with the given name does not exist**, print `A branch with that name does not exist.`
+
+Then calls `Merge.merge(Branch current, Branch other)`, which belongs to a class exclusively designed for the `merge` command. The first thing we need to do is to find the *split commit* of the two branches: ***latest common ancestor***. Since our commit history will be very complicated, we need to get a **detailed map** of it. What I do is to utilize *Depth First Search* `DFS` to recursively traverse through the both latest commits and records each commit as well as its ***DEPTH** (very important, this is how we get to know whether the split point we find is the latest one!)*. 
+
+```java
+private static void traceBackCommit(Commit commit, Map<String, Integer> map, int depth) {
+    // Base case
+    if (commit == null) {
+        return;
+    }
+    // Records commit id along with depth
+    map.put(commit.getUID(), depth);
+    // Where recursion happening...
+    traceBackCommit(commit.getParent(), map, depth + 1);
+    traceBackCommit(commit.getMergeParent(), map, depth + 1);
+}
+```
+
+After getting the two commit maps with depth recorded, the program iterates over each key `commit id` in the **current-branch** commit map, and see whether the **other-branch** commit map *contains* it, and takes ***the one with the smallest depth*** to become the split commit we choose. With the split commit, we again need to conduct some checking:
+- **If the *split point* is the same commit as the given branch**, then we do nothing, the merge is complete with the message `Given branch is an ancestor of the current branch.`
+- **If the *split point* is the current branch**, then the effect is to check-out the given branch with the message `Current branch fast-forwarded.`
+
+Now we are starting to actually merge the files in two branches. The seven rules can be simplified into the following. *Strong recommended to check out this [Merge Example video](https://www.youtube.com/watch?v=JR3OYCMv9b4&t=929s), everything is explained in detail!*
+1. Not present in `split` nor in `other` but in `current` -> `current`
+2. Not present in `split` nor in `current` but in `other` -> `other`
+3. Unmodified in `current` but not present in `other` -> remove
+4. Unmodified in `other` but not present in `head` -> remove
+5. Modified in `other` but not in `current` -> `other`
+6. Modified in `current` but not in `head` -> `current`
+7. Modified in both `current` and `other`,
+   1. in the same way -> `current`/`other` (they are the same)
+   2. in different ways -> ***CONFLICT**, refer to [merge spec](https://sp21.datastructur.es/materials/proj/proj2/proj2#merge) for how to format merge conflicts*
+
+I follow the guidance as well when going through every file, check it out [here](gitlet/Merge.java#L60). Therefore, we have got a ***merged*** version of `Map<File, Blob>`. This map is **forced to replace the *"staged for addition"*** part in the staging area so that the new merge commit will track them during which also checks **if untracked file(s) in the current commit would be overwritten** and print `There is an untracked file in the way; delete it, or add and commit it first.`
+
+Finally! Make a merge commit and use the `reset` command to help write those files!
+
 ## Persistence
 
-Structure of the `.gitlet` repository *(temporarily built until now)*:
+Structure of the `.gitlet` repository *(excluding remote)*:
 
 ```
 .gitlet/
