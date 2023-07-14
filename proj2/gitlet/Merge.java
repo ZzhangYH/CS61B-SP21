@@ -130,7 +130,7 @@ public class Merge {
         byte[] head = "<<<<<<< HEAD\n".getBytes(StandardCharsets.UTF_8);
         byte[] body = "=======\n".getBytes(StandardCharsets.UTF_8);
         byte[] feet = ">>>>>>>\n".getBytes(StandardCharsets.UTF_8);
-        ByteArrayOutputStream str = new ByteArrayOutputStream( );
+        ByteArrayOutputStream str = new ByteArrayOutputStream();
         try {
             str.write(head);
             str.write(currentContents);

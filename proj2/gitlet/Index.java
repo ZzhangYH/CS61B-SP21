@@ -69,8 +69,8 @@ public class Index implements Serializable {
         // Checks if any untracked file(s) would be overwritten.
         for (String s : getUntracked()) {
             if (merged.containsKey(join(CWD, s))) {
-                exit("There is an untracked file in the way; " +
-                        "delete it, or add and commit it first.");
+                exit("There is an untracked file in the way; "
+                        + "delete it, or add and commit it first.");
             }
         }
         // Deletes all the files (not the blobs) currently tracked.
@@ -102,8 +102,8 @@ public class Index implements Serializable {
     public void checkUntracked(Commit commit) {
         for (String s : getUntracked()) {
             if (commit.isTracked(join(CWD, s))) {
-                exit("There is an untracked file in the way; " +
-                        "delete it, or add and commit it first.");
+                exit("There is an untracked file in the way; "
+                        + "delete it, or add and commit it first.");
             }
         }
     }
