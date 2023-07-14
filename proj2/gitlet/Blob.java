@@ -3,9 +3,9 @@ package gitlet;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.*;
 
 import static gitlet.Utils.*;
-import static gitlet.Repository.*;
 
 /**
  * Represents a blob tracking each file in the repository.
@@ -48,9 +48,16 @@ public class Blob implements Serializable {
         writeContents(path, contents);
     }
 
-    /** Returns whether the file is modified in the specified commit. */
-    public boolean isModifiedIn(Commit commit) {
-        return this.equals(commit.getBlob(path));
+    /** Returns whether the blob is in the specified map. */
+    public boolean isIn(Map<File, Blob> map) {
+        return map.containsKey(this.path);
+    }
+
+    /** Returns whether the blob in FROM is modified in TO. */
+    public boolean isModifiedIn(Map<File, Blob> from, Map<File, Blob> to) {
+        byte[] fromContents = from.get(this.path).getContents();
+        byte[] toContents = to.get(this.path).getContents();
+        return !Arrays.equals(fromContents, toContents);
     }
 
     /** Returns the name of the blob. */

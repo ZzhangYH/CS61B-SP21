@@ -22,7 +22,9 @@ public class Commit implements Serializable {
     /** Date of this commit. */
     private final Date date;
     /** Parent of this commit. */
-    private Commit parent;
+    private final Commit parent;
+    /** Merged parent of this commit. */
+    private final Commit mergeParent;
     /** UID of this commit. */
     private String UID;
 
@@ -31,6 +33,7 @@ public class Commit implements Serializable {
         this.message = "initial commit";
         this.date = new Date(0);
         this.parent = null;
+        this.mergeParent = null;
     }
 
     /** Constructor of a normal commit. */
@@ -38,7 +41,17 @@ public class Commit implements Serializable {
         this.message = message;
         this.date = new Date();
         this.parent = getCurrentCommit();
+        this.mergeParent = null;
         this.blobs.putAll(this.parent.getBlobs());
+    }
+
+    /** Constructor of a merge commit. */
+    public Commit(Branch current, Branch other) {
+        this.message = String.format("Merged %s into %s.", other.getName(), current.getName());
+        this.date = new Date();
+        this.parent = current.getCommit();
+        this.mergeParent = other.getCommit();
+        this.blobs.putAll(getIndex().getStaged());
     }
 
     /** Generates and sets the UID of the commit. */
@@ -58,8 +71,8 @@ public class Commit implements Serializable {
 
     /** Commits and writes to the logs. */
     public void commit() {
-        // Checks the staging area unless the initial commit.
-        if (parent != null) {
+        // Checks the staging area unless initial or merge commit.
+        if (parent != null && mergeParent == null) {
             checkCommit();
         }
         // Generates UID.
@@ -151,7 +164,7 @@ public class Commit implements Serializable {
         while (true) {
             Commit otherTemp = other;
             while (otherTemp != null) {
-                if (currentTemp.equals(otherTemp)) {
+                if (currentTemp.UID.equals(otherTemp.UID)) {
                     return currentTemp;
                 }
                 otherTemp = otherTemp.getParent();
@@ -224,7 +237,15 @@ public class Commit implements Serializable {
     @Override
     public String toString() {
         SimpleDateFormat d = new SimpleDateFormat("E MMM dd HH:mm:ss yyyy Z", Locale.ENGLISH);
-        return "===\ncommit " + UID + "\n" + "Date: " + d.format(date) + "\n" + message + "\n";
+        StringBuilder log = new StringBuilder();
+        log.append("===\ncommit ").append(UID).append("\n");
+        if (mergeParent != null) {
+            log.append("Merge: ");
+            log.append(parent.UID, 0, 7).append(" ");
+            log.append(mergeParent.UID, 0, 7).append("\n");
+        }
+        log.append("Date: ").append(d.format(date)).append("\n").append(message).append("\n");
+        return log.toString();
     }
 
 }

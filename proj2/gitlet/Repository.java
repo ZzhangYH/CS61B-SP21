@@ -176,8 +176,8 @@ public class Repository {
         if (branchName.equals(getCurrentBranch().getName())) {
             exit("Cannot merge a branch with itself.");
         }
-        // If there are staged additions or removals present.
-        if (getIndex().isClear()) {
+        // Checks if there are staged additions or removals present.
+        if (!getIndex().isClear()) {
             exit("You have uncommitted changes.");
         }
         Branch other = Branch.find(branchName, 2);

@@ -48,7 +48,7 @@ public class Index implements Serializable {
         save();
     }
 
-    /** Unstages the file and removes it if eligible. */
+    /** Un-stages the file and removes it if eligible. */
     public void remove(String fileName, File file) {
         boolean tracked = getCurrentCommit().isTracked(file);
         if (!isStaged(file) && !tracked) {
@@ -61,6 +61,13 @@ public class Index implements Serializable {
                 file.delete();
             }
         }
+        save();
+    }
+
+    /** Clears the staging area and stages all files in the merged map. */
+    public void merge(Map<File, Blob> merged) {
+        clear();
+        staged.putAll(merged);
         save();
     }
 
@@ -90,6 +97,11 @@ public class Index implements Serializable {
         }
     }
 
+    /** Returns whether the staging area is cleared. */
+    public boolean isClear() {
+        return staged.isEmpty() && removed.isEmpty();
+    }
+
     /** Returns whether the specified file is staged for addition. */
     public boolean isStaged(File file) {
         return staged.containsKey(file);
@@ -98,11 +110,6 @@ public class Index implements Serializable {
     /** Returns whether the specified file is staged for removal. */
     public boolean isRemoved(File file) {
         return removed.containsKey(file);
-    }
-
-    /** Returns whether the staging area is cleared. */
-    public boolean isClear() {
-        return staged.keySet().size() == 0 && removed.keySet().size() == 0;
     }
 
     /** Returns the map of the staged blobs. */
