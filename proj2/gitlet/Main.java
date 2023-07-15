@@ -90,10 +90,26 @@ public class Main {
      *       Saves the given login information under the given remote name. Attempts to push or
      *       pull from the given remote name will then attempt to use this .gitlet directory.
      *
-     *  rm-remote <remote name>
+     *  rm-remote <remote name> --
      *      Removes information associated with the given remote name. The idea here is that
      *      if you ever wanted to change a remote that you added, you would have to first remove
      *      it and then re-add it.
+     *
+     *  push <remote name> <remote branch name> --
+     *      Attempts to append the current branch’s commits to the end of the given branch at the
+     *      given remote. This command only works if the remote branch’s head is in the history of
+     *      the current local head, which means that the local branch contains some commits in the
+     *      future of the remote branch.
+     *
+     *  fetch <remote name> <remote branch name> --
+     *      Brings down commits from the remote Gitlet repository into the local Gitlet repository.
+     *      Basically, this copies all commits and blobs from the given branch in the remote
+     *      repository (that are not already in the current repository) into a branch named
+     *      [remote name]/[remote branch name] in the local .gitlet.
+     *
+     *  pull <remote name> <remote branch name> --
+     *      Fetches branch [remote name]/[remote branch name] as for the fetch command, and then
+     *      merges that fetch into the current branch.
      *
      */
     public static void main(String[] args) {
@@ -157,11 +173,23 @@ public class Main {
                 break;
             case "add-remote":
                 validate(args, 3);
-                Repository.addRemote(args[1], args[2]);
+                Remote.addRemote(args[1], args[2]);
                 break;
             case "rm-remote":
                 validate(args,2);
-                Repository.rmRemote(args[1]);
+                Remote.rmRemote(args[1]);
+                break;
+            case "push":
+                validate(args,3);
+                Remote.push(args[1], args[2]);
+                break;
+            case "fetch":
+                validate(args, 3);
+                Remote.fetch(args[1], args[2]);
+                break;
+            case "pull":
+                validate(args, 3);
+                Remote.pull(args[1], args[2]);
                 break;
             default:
                 exit("No command with that name exists.");

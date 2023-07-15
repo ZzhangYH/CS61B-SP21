@@ -54,30 +54,8 @@ public class Commit implements Serializable {
         this.blobs.putAll(getIndex().getStaged());
     }
 
-    /** Generates and sets the UID of the commit. */
-    public void setUID() {
-        List<Object> vals = new ArrayList<Object>();
-        Set<File> files = blobs.keySet();
-        for (File f : files) {
-            vals.add(f.toString());
-        }
-        if (parent != null) {
-            vals.add(parent.toString());
-        }
-        vals.add(message);
-        vals.add(date.toString());
-        this.UID = sha1(vals);
-    }
-
-    /** Commits and writes to the logs. */
-    public void commit() {
-        // Checks the staging area unless initial or merge commit.
-        if (parent != null && mergeParent == null) {
-            checkCommit();
-        }
-        // Generates UID.
-        setUID();
-        // Writes the commit object.
+    /** Creates and writes to the Commit object. */
+    public void save() {
         try {
             File folder = getPathFolder();
             if (!folder.exists()) {
@@ -88,7 +66,16 @@ public class Commit implements Serializable {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        // Update the current working branch.
+    }
+
+    /** Commits and writes to the logs. */
+    public void commit() {
+        // Checks the staging area unless initial or merge commit.
+        if (parent != null && mergeParent == null) {
+            checkCommit();
+        }
+        setUID();
+        save();
         Branch b = getCurrentBranch();
         b.setCommit(this);
     }
@@ -106,6 +93,21 @@ public class Commit implements Serializable {
         }
         blobs.putAll(idx.getStaged());
         idx.clear();
+    }
+
+    /** Generates and sets the UID of the commit. */
+    public void setUID() {
+        List<Object> vals = new ArrayList<Object>();
+        Set<File> files = blobs.keySet();
+        for (File f : files) {
+            vals.add(f.toString());
+        }
+        if (parent != null) {
+            vals.add(parent.toString());
+        }
+        vals.add(message);
+        vals.add(date.toString());
+        this.UID = sha1(vals);
     }
 
     /** Finds all commits ever made and returns them as a set. */

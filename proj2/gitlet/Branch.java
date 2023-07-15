@@ -24,7 +24,7 @@ public class Branch implements Serializable {
     /** Constructor of a branch. */
     public Branch(String name) {
         this.name = name;
-        this.path = join("refs", "heads", this.name);
+        this.path = join("refs", "heads", this.name.replace("/", "_"));
         try {
             // Checks if a branch with the given name already exists.
             if (!getRefFile().createNewFile() || !getLogFile().createNewFile()) {
@@ -74,6 +74,16 @@ public class Branch implements Serializable {
                     "===\ncommit " + log.substring(log.indexOf(id)));
         }
         save();
+    }
+
+    /** Returns all the commits in the branch history as a set. */
+    public Set<Commit> getAllCommits() {
+        Set<Commit> commits = new HashSet<>();
+        while (commit.getParent() != null) {
+            commits.add(commit);
+            commit = commit.getParent();
+        }
+        return commits;
     }
 
     /** Finds all the existing branches and returns them as a set. */

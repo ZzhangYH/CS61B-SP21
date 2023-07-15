@@ -45,8 +45,10 @@ public class Repository {
         REFS_DIR.mkdir();
         LOGS_DIR.mkdir();
         join(REFS_DIR, "heads").mkdir();
+        join(REFS_DIR, "remotes").mkdir();
         join(LOGS_DIR, "refs").mkdir();
         join(LOGS_DIR, "refs", "heads").mkdir();
+        join(LOGS_DIR, "refs", "remotes").mkdir();
 
         // Creates staging area.
         writeObject(INDEX, new Index());
@@ -182,18 +184,6 @@ public class Repository {
         }
         Branch other = Branch.find(branchName, 2);
         Merge.merge(getCurrentBranch(), other);
-    }
-
-    /** Saves the given login information under the given remote name. */
-    public static void addRemote(String remoteName, String dirString) {
-        File dirPath = join(dirString.replace("/", File.separator));
-        Remote r = new Remote(remoteName, dirPath);
-    }
-
-    /** Remove information associated with the given remote name. */
-    public static void rmRemote(String remoteName) {
-        Remote r = Remote.find(remoteName);
-        r.remove();
     }
 
     /** Returns the object of the current working branch. */
