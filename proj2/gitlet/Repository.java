@@ -184,6 +184,18 @@ public class Repository {
         Merge.merge(getCurrentBranch(), other);
     }
 
+    /** Saves the given login information under the given remote name. */
+    public static void addRemote(String remoteName, String dirString) {
+        File dirPath = join(dirString.replace("/", File.separator));
+        Remote r = new Remote(remoteName, dirPath);
+    }
+
+    /** Remove information associated with the given remote name. */
+    public static void rmRemote(String remoteName) {
+        Remote r = Remote.find(remoteName);
+        r.remove();
+    }
+
     /** Returns the object of the current working branch. */
     public static Branch getCurrentBranch() {
         return readObject(join(GITLET_DIR, readContentsAsString(HEAD)), Branch.class);

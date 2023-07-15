@@ -86,6 +86,15 @@ public class Main {
      *  merge <branch name> --
      *      Merges files from the given branch into the current branch.
      *
+     *  add-remote <remote name> <name of the directory>/.gitlet
+     *       Saves the given login information under the given remote name. Attempts to push or
+     *       pull from the given remote name will then attempt to use this .gitlet directory.
+     *
+     *  rm-remote <remote name>
+     *      Removes information associated with the given remote name. The idea here is that
+     *      if you ever wanted to change a remote that you added, you would have to first remove
+     *      it and then re-add it.
+     *
      */
     public static void main(String[] args) {
         // No input arguments.
@@ -145,6 +154,14 @@ public class Main {
             case "merge":
                 validate(args, 2);
                 Repository.merge(args[1]);
+                break;
+            case "add-remote":
+                validate(args, 3);
+                Repository.addRemote(args[1], args[2]);
+                break;
+            case "rm-remote":
+                validate(args,2);
+                Repository.rmRemote(args[1]);
                 break;
             default:
                 exit("No command with that name exists.");
