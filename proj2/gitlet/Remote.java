@@ -20,7 +20,7 @@ public class Remote implements Serializable {
     private final String name;
     /** Relative path to this remote. */
     private final File path;
-    /** Absolute path to the remote repository (.gitlet directory). */
+    /** Absolute path to the repository (.gitlet) of this remote. */
     private final File directory;
 
     /** Constructor of a remote. */
@@ -30,7 +30,7 @@ public class Remote implements Serializable {
         this.directory = directory;
         try {
             // Checks if a remote with the given name already exists.
-            if (!getRefFile().createNewFile() || !getLogFile().createNewFile()) {
+            if (!getRefFile().createNewFile()) {
                 exit("A remote with that name already exists.");
             }
         } catch (IOException e) {
@@ -56,9 +56,6 @@ public class Remote implements Serializable {
         if (r.getRefFile().exists()) {
             r.getRefFile().delete();
         }
-        if (r.getLogFile().exists()) {
-            r.getLogFile().delete();
-        }
     }
 
     /** Attempts to append the current branch's commits to the end of the given branch
@@ -66,57 +63,42 @@ public class Remote implements Serializable {
     public static void push(String remoteName, String remoteBranchName) {
         Remote remote = find(remoteName);
         Branch remoteBranch = remote.findBranch(remoteBranchName);
-        Branch localBranch = getCurrentBranch();
-        Set<Commit> localCommits = localBranch.getAllCommits();
+        Set<Commit> localCommits = getCurrentBranch().getAllCommits();
         // If the remote branch's head is not in the history of the current local head.
-        if (!localCommits.contains(remoteBranch.getCommit())) {
+        Set<String> commitIds = new HashSet<>();
+        for (Commit c : localCommits) {
+            commitIds.add(c.getUID());
+        }
+        if (!commitIds.contains(remoteBranch.getCommit().getUID())) {
             exit("Please pull down remote changes before pushing.");
         }
-        // Saves all local branch commits to the remote branch.
-        File remoteObj = join(remote.directory, "objects");
+        // Saves the commits and updates the remote branch
         for (Commit c : localCommits) {
-            File pathFolder = join(remoteObj, c.getUID().substring(0, 2));
-            File pathFile = join(pathFolder, c.getUID().substring(2));
-            try {
-                if (!pathFolder.exists()) {
-                    pathFolder.mkdir();
-                }
-                pathFile.createNewFile();
-                writeObject(pathFile, c);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            c.saveTo(remote.directory);
         }
-        // Updates the remote branch.
-        remoteBranch.setCommit(getCurrentCommit());
-        writeContents(remoteBranch.getLogFile(), readContents(localBranch.getLogFile()));
+        remoteBranch.resetCommit(getCurrentCommit());
     }
 
     /** Brings down commits from the remote repository into the local repository. */
     public static void fetch(String remoteName, String remoteBranchName) {
         String localBranchName = remoteName + "/" + remoteBranchName;
-        Remote remote = find(remoteName);
-        Branch remoteBranch = remote.findBranch(remoteBranchName);
+        Branch remoteBranch = find(remoteName).findBranch(remoteBranchName);
         Branch localBranch = Branch.find(localBranchName, 0);
         if (localBranch == null) {
             localBranch = new Branch(localBranchName);
         }
-        // Writes all commits from the remote branch.
+        // Saves the commits and updates the local branch
         Set<Commit> commits = remoteBranch.getAllCommits();
         for (Commit c : commits) {
             c.save();
         }
-        // Sets the local branch head and updates the log file.
-        localBranch.setCommit(remoteBranch.getCommit());
-        File remoteLog = join(remote.directory, "logs", "refs", "heads", remoteBranchName);
-        writeContents(localBranch.getLogFile(), readContents(remoteLog));
+        localBranch.resetCommit(remoteBranch.getCommit());
     }
 
     /** Fetches the specified remote branch and merges that fetch into the current branch. */
     public static void pull(String remoteName, String remoteBranchName) {
-        String localBranchName = remoteName + "/" + remoteBranchName;
         fetch(remoteName, remoteBranchName);
-        merge(localBranchName);
+        merge(remoteName + "/" + remoteBranchName);
     }
 
     /** Finds all the existing remotes and returns them as a set. */
@@ -136,7 +118,7 @@ public class Remote implements Serializable {
     public static Remote find(String remoteName) {
         Remote remote = null;
         for (Remote b : findAll()) {
-            if (remoteName.equals(b.getName())) {
+            if (remoteName.equals(b.name)) {
                 remote = b;
                 break;
             }
@@ -156,36 +138,24 @@ public class Remote implements Serializable {
             exit("Remote directory not found.");
         }
         List<String> branchNames = plainFilenamesIn(dir);
+        Branch branch = null;
         if (branchNames != null) {
             for (String name : branchNames) {
                 if (remoteBranchName.equals(name)) {
-                    return readObject(join(dir, name), Branch.class);
+                    branch = readObject(join(dir, name), Branch.class);
                 }
             }
         }
         // If the remote repository does not have the given branch name.
-        exit("That remote does not have that branch.");
-        return null;
-    }
-
-    /** Return the name of the remote. */
-    public String getName() {
-        return this.name;
+        if (branch == null) {
+            exit("That remote does not have that branch.");
+        }
+        return branch;
     }
 
     /** Return the absolute path to the refs. */
     public File getRefFile() {
         return join(GITLET_DIR, this.path);
-    }
-
-    /** Return the absolute path to the logs. */
-    public File getLogFile() {
-        return join(LOGS_DIR, this.path);
-    }
-
-    /** Returns the directory of the remote. */
-    public File getDirectory() {
-        return this.directory;
     }
 
 }

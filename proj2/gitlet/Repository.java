@@ -48,7 +48,6 @@ public class Repository {
         join(REFS_DIR, "remotes").mkdir();
         join(LOGS_DIR, "refs").mkdir();
         join(LOGS_DIR, "refs", "heads").mkdir();
-        join(LOGS_DIR, "refs", "remotes").mkdir();
 
         // Creates staging area.
         writeObject(INDEX, new Index());

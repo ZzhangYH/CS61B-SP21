@@ -18,6 +18,8 @@ public class Branch implements Serializable {
     private final String name;
     /** Relative path to this branch. */
     private final File path;
+    /** Absolute path to the repository (.gitlet) of this branch. */
+    private final File directory;
     /** Latest commit of this branch. */
     private Commit commit;
 
@@ -25,6 +27,7 @@ public class Branch implements Serializable {
     public Branch(String name) {
         this.name = name;
         this.path = join("refs", "heads", this.name.replace("/", "_"));
+        this.directory = GITLET_DIR;
         try {
             // Checks if a branch with the given name already exists.
             if (!getRefFile().createNewFile() || !getLogFile().createNewFile()) {
@@ -79,9 +82,10 @@ public class Branch implements Serializable {
     /** Returns all the commits in the branch history as a set. */
     public Set<Commit> getAllCommits() {
         Set<Commit> commits = new HashSet<>();
-        while (commit.getParent() != null) {
-            commits.add(commit);
-            commit = commit.getParent();
+        Commit c = commit;
+        while (c.getParent() != null) {
+            commits.add(c);
+            c = c.getParent();
         }
         return commits;
     }
@@ -129,12 +133,12 @@ public class Branch implements Serializable {
 
     /** Return the absolute path to the refs. */
     public File getRefFile() {
-        return join(GITLET_DIR, this.path);
+        return join(directory, this.path);
     }
 
     /** Return the absolute path to the logs. */
     public File getLogFile() {
-        return join(LOGS_DIR, this.path);
+        return join(join(directory, "logs"), this.path);
     }
 
     /** Return the latest commit of the branch. */

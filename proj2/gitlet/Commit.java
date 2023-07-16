@@ -57,12 +57,26 @@ public class Commit implements Serializable {
     /** Creates and writes to the Commit object. */
     public void save() {
         try {
-            File folder = getPathFolder();
-            if (!folder.exists()) {
-                folder.mkdir();
+            if (!getPathFolder().exists()) {
+                getPathFolder().mkdir();
             }
             getPathFile().createNewFile();
             writeObject(getPathFile(), this);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /** Creates and writes the Commit object to the specified directory. */
+    public void saveTo(File dir) {
+        File pathFolder = join(dir, UID.substring(0, 2));
+        File pathFile = join(pathFolder, UID.substring(2));
+        try {
+            if (!pathFolder.exists()) {
+                pathFolder.mkdir();
+            }
+            pathFile.createNewFile();
+            writeObject(pathFile, this);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
