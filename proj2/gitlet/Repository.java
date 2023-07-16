@@ -168,7 +168,7 @@ public class Repository {
         Commit c = Commit.find(commitID);
         getCurrentCommit().deleteTrackedFiles(c);
         c.overwriteTrackedFiles();
-        getCurrentBranch().setCommit(c);
+        getCurrentBranch().resetCommit(c);
         getIndex().clear();
     }
 

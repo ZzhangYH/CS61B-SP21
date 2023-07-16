@@ -61,19 +61,19 @@ public class Branch implements Serializable {
     /** Updates the branch with the latest commit and save it. */
     public void setCommit(Commit commit) {
         this.commit = commit;
-        String id = commit.getUID();
-        String log = readContentsAsString(getLogFile());
-        // Write to the log.
-        if (!log.contains(id)) {
-            // New commit.
-            writeContents(getLogFile(),
-                    commit.toString() + "\n" + readContentsAsString(getLogFile()));
-        } else {
-            // Reset commit.
-            writeContents(getLogFile(),
-                    "===\ncommit " + log.substring(log.indexOf(id)));
-        }
         save();
+    }
+
+    /** Resets the branch with the specified commit. */
+    public void resetCommit(Commit commit) {
+        setCommit(commit);
+        // Resets the log file.
+        StringBuilder log = new StringBuilder();
+        while (commit != null) {
+            log.append(commit.toString()).append("\n");
+            commit = commit.getParent();
+        }
+        writeContents(getLogFile(), log.toString());
     }
 
     /** Returns all the commits in the branch history as a set. */
