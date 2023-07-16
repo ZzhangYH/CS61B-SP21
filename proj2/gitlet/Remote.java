@@ -3,9 +3,7 @@ package gitlet;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static gitlet.Utils.*;
 import static gitlet.Repository.*;
@@ -36,11 +34,6 @@ public class Remote implements Serializable {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        save();
-    }
-
-    /** Updates and writes to the Remote object. */
-    public void save() {
         writeObject(this.getRefFile(), this);
     }
 
@@ -72,7 +65,7 @@ public class Remote implements Serializable {
         if (!commitIds.contains(remoteBranch.getCommit().getUID())) {
             exit("Please pull down remote changes before pushing.");
         }
-        // Saves the commits and updates the remote branch
+        // Saves the commits and updates the remote branch.
         for (Commit c : localCommits) {
             c.saveTo(remote.directory);
         }
@@ -87,7 +80,7 @@ public class Remote implements Serializable {
         if (localBranch == null) {
             localBranch = new Branch(localBranchName);
         }
-        // Saves the commits and updates the local branch
+        // Saves the commits and updates the local branch.
         Set<Commit> commits = remoteBranch.getAllCommits();
         for (Commit c : commits) {
             c.save();
@@ -140,9 +133,9 @@ public class Remote implements Serializable {
         List<String> branchNames = plainFilenamesIn(dir);
         Branch branch = null;
         if (branchNames != null) {
-            for (String name : branchNames) {
-                if (remoteBranchName.equals(name)) {
-                    branch = readObject(join(dir, name), Branch.class);
+            for (String s : branchNames) {
+                if (remoteBranchName.equals(s)) {
+                    branch = readObject(join(dir, s), Branch.class);
                 }
             }
         }

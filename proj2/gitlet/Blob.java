@@ -62,8 +62,8 @@ public class Blob implements Serializable {
 
     /** Returns whether the blob in FROM is modified in TO. */
     public boolean isModifiedIn(Map<File, Blob> from, Map<File, Blob> to) {
-        byte[] fromContents = from.get(this.path).getContents();
-        byte[] toContents = to.get(this.path).getContents();
+        byte[] fromContents = from.get(path).contents;
+        byte[] toContents = to.get(path).contents;
         return !Arrays.equals(fromContents, toContents);
     }
 

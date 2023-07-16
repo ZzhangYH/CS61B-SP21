@@ -56,27 +56,32 @@ public class Branch implements Serializable {
 
     /** Synchronizes the branch with the specified branch history. */
     public void sync(Branch branch) {
-        this.commit = branch.getCommit();
+        this.commit = branch.commit;
         writeContents(this.getLogFile(), readContents(branch.getLogFile()));
         save();
     }
 
-    /** Updates the branch with the latest commit and save it. */
+    /** Updates the branch with the latest commit and saves it. */
     public void setCommit(Commit commit) {
         this.commit = commit;
         save();
     }
 
     /** Resets the branch with the specified commit. */
-    public void resetCommit(Commit commit) {
-        setCommit(commit);
-        // Resets the log file.
+    public void resetCommit(Commit newCommit) {
+        getCurrentCommit().deleteTrackedFiles(newCommit);
+        newCommit.overwriteTrackedFiles();
+        setCommit(newCommit);
+        // Regenerates the branch log file.
         StringBuilder log = new StringBuilder();
-        while (commit != null) {
-            log.append(commit.toString()).append("\n");
-            commit = commit.getParent();
+        Commit c = newCommit;
+        while (c != null) {
+            log.append(c.toString()).append("\n");
+            c = c.getParent();
         }
         writeContents(getLogFile(), log.toString());
+        // Clears the staging area.
+        readObject(join(directory, "index"), Index.class).clear();
     }
 
     /** Returns all the commits in the branch history as a set. */
@@ -107,7 +112,7 @@ public class Branch implements Serializable {
     public static Branch find(String branchName, int key) {
         Branch branch = null;
         for (Branch b : findAll()) {
-            if (branchName.equals(b.getName())) {
+            if (branchName.equals(b.name)) {
                 branch = b;
                 break;
             }

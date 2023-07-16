@@ -165,10 +165,7 @@ public class Repository {
     /** Resets all the files tracked and the branch's head pointer by the given commit. */
     public static void reset(String commitID) {
         Commit c = Commit.find(commitID);
-        getCurrentCommit().deleteTrackedFiles(c);
-        c.overwriteTrackedFiles();
         getCurrentBranch().resetCommit(c);
-        getIndex().clear();
     }
 
     /** Merges files from the given branch into the current branch. */

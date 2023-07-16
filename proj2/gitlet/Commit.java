@@ -42,7 +42,7 @@ public class Commit implements Serializable {
         this.date = new Date();
         this.parent = getCurrentCommit();
         this.mergeParent = null;
-        this.blobs.putAll(this.parent.getBlobs());
+        this.blobs.putAll(parent.blobs);
     }
 
     /** Constructor of a merge commit. */
@@ -67,7 +67,7 @@ public class Commit implements Serializable {
         }
     }
 
-    /** Creates and writes the Commit object to the specified directory. */
+    /** Creates and writes the Commit object to the specified repository. */
     public void saveTo(File dir) {
         File pathFolder = join(dir, UID.substring(0, 2));
         File pathFile = join(pathFolder, UID.substring(2));
@@ -166,7 +166,7 @@ public class Commit implements Serializable {
         Set<Commit> commits = findAll();
         Set<String> ids = new HashSet<String>();
         for (Commit c : commits) {
-            if (c.getMessage().equals(message)) {
+            if (c.message.equals(message)) {
                 ids.add(c.getUID());
             }
         }
@@ -205,11 +205,6 @@ public class Commit implements Serializable {
     /** Returns the map of blobs of the commit. */
     public Map<File, Blob> getBlobs() {
         return this.blobs;
-    }
-
-    /** Returns the message of the commit. */
-    public String getMessage() {
-        return this.message;
     }
 
     /** Returns the parent of the commit. */

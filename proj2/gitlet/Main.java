@@ -113,13 +113,10 @@ public class Main {
      *
      */
     public static void main(String[] args) {
-        // No input arguments.
         if (args.length == 0) {
             exit("Please enter a command.");
         }
-
-        String cmd = args[0];
-        switch (cmd) {
+        switch (args[0]) {
             case "init":
                 Repository.initialize();
                 validate(args, 1);
@@ -176,11 +173,11 @@ public class Main {
                 Remote.addRemote(args[1], args[2]);
                 break;
             case "rm-remote":
-                validate(args,2);
+                validate(args, 2);
                 Remote.rmRemote(args[1]);
                 break;
             case "push":
-                validate(args,3);
+                validate(args, 3);
                 Remote.push(args[1], args[2]);
                 break;
             case "fetch":
