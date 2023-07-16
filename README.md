@@ -12,12 +12,12 @@ Great thanks to [Professor Josh Hug](https://www2.eecs.berkeley.edu/Faculty/Home
 
 List of projects in the course and my stats:
 
-| Projects                                                                              | Start Date | End Date | Autograder Mark           |
-| ------------------------------------------------------------------------------------- | ---------- | -------- | ------------------------- |
-| [Project 0: 2048](https://sp21.datastructur.es/materials/proj/proj0/proj0)            | May 14     | May 14   | **640** / `640 pts`       |
-| [Project 1: Data Structures](https://sp21.datastructur.es/materials/proj/proj1/proj1) | May 27     | Jun 13   | **688** / `640+16+32 pts` |
-| [Project 2: Gitlet](https://sp21.datastructur.es/materials/proj/proj2/proj2)          | Jun 20     |          |                           |
-| [Project 3: BYOW](https://sp21.datastructur.es/materials/proj/proj3/proj3)            |            |          |                           |
+| Projects                                                                              | Start Date | End Date | Autograder Mark       |
+| ------------------------------------------------------------------------------------- | ---------- | -------- | --------------------- |
+| [Project 0: 2048](https://sp21.datastructur.es/materials/proj/proj0/proj0)            | May 14     | May 14   | **640** / `640 pts`   |
+| [Project 1: Data Structures](https://sp21.datastructur.es/materials/proj/proj1/proj1) | May 27     | Jun 13   | **640** / `640 pts`   |
+| [Project 2: Gitlet](https://sp21.datastructur.es/materials/proj/proj2/proj2)          | Jun 20     | Jul 16   | **1696** / `1600 pts` |
+| [Project 3: BYOW](https://sp21.datastructur.es/materials/proj/proj3/proj3)            |            |          |                       |
 
 ## Lab Assignments
 

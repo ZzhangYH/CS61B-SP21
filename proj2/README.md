@@ -1,6 +1,65 @@
 # Gitlet Design Document
 
-**Name**: Yuhan Zhang
+**Name:** Yuhan Zhang
+
+**Contents:**
+
+<table>
+  <thead>
+    <tr>
+      <th>Category</th>
+      <th>Classes and Data Structures</th>
+      <th>Command Algorithms</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Local</td>
+      <td>
+        <a href="#main">Main.class</a><br>
+        <a href="#repository">Repository.class</a><br>
+        <a href="#index">Index.class</a><br>
+        <a href="#merge">Merge.class</a><br>
+        <a href="#branch">Branch.class</a><br>
+        <a href="#commit">Commit.class</a><br>
+        <a href="#blob">Blob.class</a>
+      </td>
+      <td>
+        <a href="#init">init</a><br>
+        <a href="#add">add</a><br>
+        <a href="#rm">rm</a><br>
+        <a href="#commit-1">commit</a><br>
+        <a href="#log">log</a><br>
+        <a href="#global-log">global-log</a><br>
+        <a href="#find">find</a><br>
+        <a href="#status">status</a><br>
+        <a href="#checkout">checkout</a><br>
+        <a href="#branch-1">branch</a><br>
+        <a href="#rm-branch">rm-branch</a><br>
+        <a href="#reset">reset</a><br>
+        <a href="#merge-1">merge</a>
+      </td>
+    </tr>
+    <tr>
+      <td>Remote</td>
+      <td>
+        <a href="#remote">Remote.class</a>
+      </td>
+      <td>
+        <a href="#add-remote">add-remote</a><br>
+        <a href="#rm-remote">rm-remote</a><br>
+        <a href="#push">push</a><br>
+        <a href="#fetch">fetch</a><br>
+        <a href="#pull">pull</a>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="3">
+        <br><b>Persistence:</b> <a href="#persistence">Gitlet repository structure</a><br><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
 
 ## Classes and Data Structures
 
@@ -37,6 +96,22 @@ This is the staging area of the gitlet repository. It holds `maps` of **staged**
 
 `Default Constructor` Initializes the `staged` and `removed` maps.
 
+### Merge
+
+The class handles the single `merge` command,  codes are just too long to fit either `Repository` class or `Branch` class, Therefore, I makes it an individual class. `Merge` has no fields or objects, only several *static methods* to deal with merge conflict, `DFS`, etc.
+
+### Remote
+
+The class is the driver class for all remote commands. Our `Main` method calls the `Repository` class before, now all remote commands go into this class. It can not only be initialized as `Remote` objects to keep track of different remotes Gitlet recognizes, but it also contains numerous *static **methods*** to directly deal with the commands: **add-remote**, **rm-remote**, **push**, **fetch**, and **pull**. Each `Remote` object is written (saved) under `.gitlet/refs/remotes/<remote-name>`.
+
+#### Fields
+
+1. `private final String name` Name of this remote.
+2. `private final File path` **Relative** path to this remote.
+3. `private final File directory` **Absolute** path to the repository (.gitlet) of this remote.
+
+`Constructor` Creates the required folders & files and saves the `Remote` object with **name**, **path**, and recorded **directory path**.
+
 ### Branch
 
 This class represents a `Branch` in our gitlet repository. Each branch has a `name` and a relative `path` which is in the form of `refs/heads/<branch-name>`. Additionally, to keep track of commits, it has a `commit` field holding the latest commit ever made by the user.
@@ -45,11 +120,12 @@ This class represents a `Branch` in our gitlet repository. Each branch has a `na
 
 #### Fields
 
-1. `private final String name`: Name of the branch.
-2. `private final File path`: **Relative** path of the branch.
-3. `private Commit commit`: Latest commit of the branch.
+1. `private final String name` Name of the branch.
+2. `private final File path` **Relative** path of the branch.
+3. `private final File directory` **Absolute** path to the repository (.gitlet) of this branch.
+4. `private Commit commit` Latest commit of the branch.
 
-`Constructor` Sets the **name** and **path** of the branch, creates the corresponding files, and sets the latest commit according to `.gitlet/HEAD` *if applicable*.
+`Constructor` Sets the **name** and **path** of the branch as well as records the repository directory, creates the corresponding files, and sets the latest commit according to `.gitlet/HEAD` *if applicable*. The `directory` field exists since when our Gitlet goes remote we will encounter multiple repos, and the recorded directory can simply help us get the exact (absolute) path to the corresponding repository.
 
 ### Commit
 
@@ -88,7 +164,7 @@ A blob holds the detailed information of a file in the repository. It helps comm
 
 All instance variables are all `final` because once the `Blob` is generated there won't be changes to it. ***Any modifications*** to the file contents will generate a **new** `Blob` to be tracked.
 
-## Algorithms
+## Command Algorithms
 
 The following shows algorithms of each command in our `Gitlet` version control system, and the validation of user inputs with the corresponding commands are done by the `Main` class:
 - **If a user doesn’t input any arguments**, the program exits with message `Please enter a command.`
@@ -127,9 +203,7 @@ It then updates the `blobs` of the commit, **adding** those *new-staged* ones, *
 
 After all things are done, the program will create the file holding the `commit` object, generate the **SHA-1** `UID` according to *file references*, *parent reference*, *log message*, and *commit time*, and **clear the staging area**. Finally, the program saves this `commit` under `.gitlet/objects` identified by its `UID`, finds the current working branch with `.gitlet/HEAD`, updates the commit into it, and appends the commit details to the `log` file of the branch.
 
-According to the real `git`, the commit objects are *stored under the subfolder of their first two digits of their* `UID` so that it makes searching for commits ***faster*** (the complexity of naive pointer representation will be linear in the number of objects)
-
-> *Not finished yet, lots more commands to integrate.*
+According to the real `git`, the commit objects are *stored under the subfolder of their first two digits of their* `UID` so that it makes searching for commits ***faster*** (the complexity of naive pointer representation will be linear in the number of objects), checkout the [Persistence](#persistence) part!
 
 ### log
 
@@ -138,6 +212,10 @@ The `log` command displays information about each commit, starting at the curren
 ### global-log
 
 This command is similar to `log` except it displays information about ***all commits ever made***. The order of the commits does not matter. Therefore, the program just traverse all subdirectories under `.gitlet/objects` and get all the `Commit` objects ever stored. Print each of their information out using the overridden `toSting()` method.
+
+### find
+
+Finding a commit is going through **all commits ever made**, checks whether the commit message (log) is the same with the one searched and prints out the ***ids*** of them *one per line*. **If no such commit exists**, prints the error message `Found no commit with that message.`
 
 ### status
 
@@ -180,7 +258,7 @@ The `rm-branch` command is also simple. Conducts the following failure tests and
 
 The `reset` command utilizes the `Commit.find(String commitID)` method to find the desired `Commit` object, during which **if no commit with the given id exists**, the program exits with `No commit with that id exists.`; then it checks whether there is **untracked file(s) under the current branch** which would be dangerous if overwritten, also exits with `There is an untracked file in the way; delete it, or add and commit it first.`
 
-As long as all checks are done, ***iterate through all blobs*** under the `Commit` object we've got, and perform `overwrite` methods on each of them, just like that in `checkout`. At the end, moves the current branch's head to that commit node and clear the staging area. *(when moving the head pointer, the existing log file is also modified correspondingly)*
+As long as all checks are done, ***iterate through all blobs*** under the `Commit` object we've got, and perform `overwrite` methods on each of them, just like that in `checkout`. At the end, moves the current branch's head to that commit node and clear the staging area. *When moving the head pointer, the existing log file is also modified correspondingly.* As soon as the `commit` field of the branch is updated, we traverse through the history of this commit following the direct (first) parent until the initial commit and rewrite the log file.
 
 ### merge
 
@@ -209,7 +287,7 @@ After getting the two commit maps with depth recorded, the program iterates over
 - **If the *split point* is the same commit as the given branch**, then we do nothing, the merge is complete with the message `Given branch is an ancestor of the current branch.`
 - **If the *split point* is the current branch**, then the effect is to check-out the given branch with the message `Current branch fast-forwarded.`
 
-Now we are starting to actually merge the files in two branches. The seven rules can be simplified into the following. *Strong recommended to check out this [Merge Example video](https://www.youtube.com/watch?v=JR3OYCMv9b4&t=929s), everything is explained in detail!*
+Now we are starting to actually merge the files in two branches. The seven rules can be simplified into the following. Strongly recommended to check out this [Merge Example video](https://www.youtube.com/watch?v=JR3OYCMv9b4&t=929s), everything is explained in detail!
 1. Not present in `split` nor in `other` but in `current` -> `current`
 2. Not present in `split` nor in `current` but in `other` -> `other`
 3. Unmodified in `current` but not present in `other` -> remove
@@ -220,13 +298,43 @@ Now we are starting to actually merge the files in two branches. The seven rules
    1. in the same way -> `current`/`other` (they are the same)
    2. in different ways -> ***CONFLICT**, refer to [merge spec](https://sp21.datastructur.es/materials/proj/proj2/proj2#merge) for how to format merge conflicts*
 
-I follow the guidance as well when going through every file, check it out [here](gitlet/Merge.java#L60). Therefore, we have got a ***merged*** version of `Map<File, Blob>`. This map is **forced to replace the *"staged for addition"*** part in the staging area so that the new merge commit will track them during which also checks **if untracked file(s) in the current commit would be overwritten** and print `There is an untracked file in the way; delete it, or add and commit it first.`
+I follow the guidance as well when going through every file, see [here](gitlet/Merge.java#L60). Therefore, we have got a ***merged*** version of `Map<File, Blob>`. This map is **forced to replace the *"staged for addition"*** part in the staging area so that the new merge commit will track them during which also checks **if untracked file(s) in the current commit would be overwritten** and print `There is an untracked file in the way; delete it, or add and commit it first.`
 
 Finally! Make a merge commit and use the `reset` command to help write those files!
 
+### add-remote
+
+Adding a remote is simply instantiating a *new* `Remote` object. Be aware that the separator `/` passed passed in must be **replaced by** `Java.io.File.separator` to adapt to both *Windows* and *Unix* systems. An addition check is conducted: **if a remote with the given name already exists**, print the error message `A remote with that name already exists.`, but we do NOT have to check whetehr the user name and server information are legit.
+
+### rm-remote
+
+Two steps to remove a remote:
+1. Check **if a remote with the given name does not exist**, print the error message `A remote with that name does not exist.`
+2. Find the `Remote` object and discard its reference file.
+
+### push
+
+A `push` is to append the current branch's commits to the end of the given branch at the given remote. However, the prerequisite is to ensure that the **remote branch's head is in the history of the current local head** *(the local branch contains some commits in the future of the remote branch)*. Hence check
+- **If the remote** `.gitlet` **directory does not exist**, print `Remote directory not found.`
+- **If the remote branch's head is not in the history of the current local head**, print `Please pull down remote changes before pushing.`
+
+What I deal with commits is to coarsely **write all commits** in the current branch's history *to the remote repository*. Then we have got the **remote** `Branch` object, resets the it with the current head so that its `commit` field and log file is updated.
+
+### fetch
+
+`fetch` does things reversely compared to `push`. It brings down commits from the remote Gitlet repository into the local Gitlet repository. When fetching, the program automatically generates **a new branch in the local repo** called `<remote-name>/<remote-branch-name>` *(if one is not already created)* to store the remote branch history. Following that, it copies **all commits** from the given branch in the remote repository, and resets the local branch `<remote-name>/<remote-branch-name>` with the remote branch head so that its `commit` field and log file is updated.
+
+Some checks:
+- **If the remote** `.gitlet` **directory does not exist**, print `Remote directory not found.`
+- **If the remote Gitlet repository does not have the given branch name**, print `That remote does not have that branch.`
+
+### pull
+
+`pull` is actually `fetch` and `merge` the **local branch *created by a remote*** as in the specification, and the checks are also the same.
+
 ## Persistence
 
-Structure of the `.gitlet` repository *(excluding remote)*:
+Structure of a `.gitlet` repository:
 
 ```
 .gitlet/
@@ -236,8 +344,11 @@ Structure of the `.gitlet` repository *(excluding remote)*:
 |   |   └── ...                # excluding the first two digits
 |   └── ...
 ├── refs/
-|   └── heads/
-|       ├── <branch-name>      # Branch object
+|   ├── heads/
+|   |   ├── <branch-name>      # Branch object
+|   |   └── ...
+|   └── remotes/
+|       ├── <remote-name>      # Remote object
 |       └── ...
 ├── logs/
 |   └── refs/
