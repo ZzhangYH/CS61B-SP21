@@ -91,6 +91,11 @@ Notes taken when auditing CS 61B, please refer to the original slides and lectur
   - [Lecture 20: Heaps and Priority Queues](#lecture-20-heaps-and-priority-queues)
     - [Heap](#heap)
     - [Tree Representations](#tree-representations)
+  - [Lecture 21: Tree and Graph Traversals](#lecture-21-tree-and-graph-traversals)
+    - [Tree Traversals](#tree-traversals)
+    - [Graphs](#graphs)
+    - [Graph Problems](#graph-problems)
+    - [Depth-First Traversals](#depth-first-traversals)
 
 </details>
 
@@ -1307,6 +1312,101 @@ Heap implementation of a Priority Queue
 | `getSmallest`    | $\Theta (1)$  | $\Theta (\log N)$ | $\Theta (N)$ | $\Theta (1)$      |
 | `removeSmallest` | $\Theta (N)$  | $\Theta (\log N)$ | $\Theta (N)$ | $\Theta (\log N)$ |
 
+### Lecture 21: Tree and Graph Traversals
+
+#### Tree Traversals
+
+A tree consists of:
+- A set of nodes
+- A set of edges that connect those nodes
+  - *There is exactly one path between any two nodes*
+
+Trees are a more general concept
+- Organization charts
+- Family lineages
+- MOH Training Manual for Management of Malaria
+
+Iterating over a tree is called ***Tree Traversal*** instead of ~~tree iteration~~. Unlike lists, there are many orders in which we might visit the nodes. Each order is useful in different ways.
+
+```mermaid
+graph TD;
+  D((D)) 
+  D ---> B((B))
+  D ---> F((F))
+  B ---> A((A))
+  B ---> C((C))
+  F ---> E((E))
+  F ---> G((G))
+```
+
+Level order
+- Visit *top-to-bottom*, *left-to-right* (like reading in English): `D` `B` `F` `A` `C` `E` `G`
+
+Depth First Traversals
+- ***Pre-order:*** Visit a node, then traverse its children: `D` `B` `A` `C` `F` `E` `G`
+- ***In-order:*** Traverse left child, visit, then traverse right child: `A` `B` `C` `D` `E` `F` `G`
+- ***Post-order:*** Traverse left, traverse right, then visit: `A` `C` `B` `E` `G` `F` `D`
+
+#### Graphs
+
+A graph consists of
+- A set of nodes
+- A set of zero or more edges, each of which connects two nodes
+
+A `simple graph` is a graph with
+- No edges that connect a vertex to itself -> *no **loops***
+- No two edges that connect the same vertices -> *no **parallel edges***
+
+Graph Types
+- `Directed`, `Undirected`
+- `Cyclic`, `Acyclic`
+- `With Edge Labels`
+
+Graph Terminology
+- Graph
+  - Sets of `vertices` (***nodes***)
+  - Set of `edges` (pair of vertices)
+  - Vertices with an edge between are `adjacent`
+  - Vertices or edges may have `labels` or `weights`
+- A `path` is a sequence of vertices connected by edges
+- A `cycle` is a path whose first and last vertices are the same
+  - A graph with a cycle is `cyclic`
+- Two vertices are `connected` if there is a path between them
+  - *If all vertices are connected, we say the graph is connected*
+
+#### Graph Problems
+
+Some well known graph problems and their common names:
+- **s-t Path.** Is there a path between vertices s and t?
+- **Connectivity.** Is the graph connected, i.e. is there a path between all vertices?
+- **Biconnectivity.** Is there a vertex whose removal disconnects the graph?
+- **Shortest s-t Path.** What is the shortest path between vertices s and t?
+- **Cycle Detection.** Does the graph contain any cycles?
+- **Euler Tour.** Is there a cycle that uses every edge exactly once?
+- **Hamilton Tour.** Is there a cycle that uses every vertex exactly once?
+- **Planarity.** Can you draw the graph on paper with no crossing edges?
+- **Isomorphism.** Are two graphs isomorphic (the same graph in disguise)?
+
+#### Depth-First Traversals
+
+The idea of exploring a neighbor's entire subgraph before moving on to the next neighbor is known as ***Depth First Traversal***. It is called "*depth first*" because you go as ***deep*** as possible.
+
+One possible recursive algorithm for **s-t Connectivity**
+- **Mark** `s`
+- Does `s == t`? If so, *return true*
+- Otherwise, if `connected(v, t)` for any unmarked neighbor `v` of `s`, *return true*.
+- *Return false*
+
+DFS is a very powerful technique that can be used for many types of graph problems. One example: `DepthFirstPaths`, which is an algorithm that **computes a path to every vertex**.
+
+***DFS Pre/Post-order:*** **Action** is **before/after DFS** calls to neighbors
+- `mark(s)` <- where pre things happen
+- For each unmarked neighbor n of s, `dfs(n)`
+- `print(s)` <- where post things happen
+
+***BFS order:*** Act in order of distance from s
+- `BFS` stands for "*breadth first search*".
+- Analogous to **level order**. Search is ***wide***, not ~~deep~~.
 
 
 
