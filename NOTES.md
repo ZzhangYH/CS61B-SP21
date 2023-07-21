@@ -96,6 +96,10 @@ Notes taken when auditing CS 61B, please refer to the original slides and lectur
     - [Graphs](#graphs)
     - [Graph Problems](#graph-problems)
     - [Depth-First Traversals](#depth-first-traversals)
+  - [Lecture 22: Graph Traversals and Implementations](#lecture-22-graph-traversals-and-implementations)
+    - [Graph API](#graph-api)
+    - [Graph Representation and Runtime](#graph-representation-and-runtime)
+    - [Graph Traversal Implementations and Runtime](#graph-traversal-implementations-and-runtime)
 
 </details>
 
@@ -1408,7 +1412,158 @@ DFS is a very powerful technique that can be used for many types of graph proble
 - `BFS` stands for "*breadth first search*".
 - Analogous to **level order**. Search is ***wide***, not ~~deep~~.
 
+`DepthFirstPaths` Find a path from `s` to every other reachable vertex, visiting each vertex at most once. `dfs(v)` is as follows:
+- Mark `v`
+- For each unmarked adjacent vertex `w`:
+  - set `edgeTo[w] = v`
+  - `dfs(w)`
 
+`BreadthFirstPaths` Find the shortest path between `s` and every other vertex.
+- Initialize the ***fringe*** (a *queue* with a starting vertex `s`) and mark that vertex
+- Repeat until fringe is empty:
+  - Remove vertex `v` from fringe
+  - For each unmarked neighbor `n` of `v`:
+    - mark `n`
+    - add `n` to fringe
+    - set `edgeTo[n] = v`
+    - set `distTo[n] = distTo[v] + 1` *(Do this if you want to track distance value)*
+
+### Lecture 22: Graph Traversals and Implementations
+
+#### Graph API
+
+To Implement our graph algorithms like `BreadthFirstPaths` and `DepthFirstPaths`, we need
+- An **API** *(Application Programming Interface)* for graphs
+- An underlying data structure to represent our graphs
+  - **Runtime**
+  - **Memory usage**
+  - **Difficulty of implementing various graph algorithms**
+
+Common convention: Number nodes irrespective of "*label*", and use number throughout the graph implementation. To lookup a vertex by label, use a `Map<Label, Integer>`.
+
+```java
+public class Graph {
+    public Graph(int v)               // Create empty graph with v vertices
+    public void addEdge(int v, int w) // add an edge v-w
+    Iterable<Integer> adj(int v)      // vertices adjacent to v
+    int V()                           // number of vertices
+    int E()                           // number of edges
+}
+```
+
+- Number of vertices must be specified in advance.
+- Does not support weights on nodes or edges.
+- Has no method for getting the number of edges for a vertex (its degree).
+
+#### Graph Representation and Runtime
+
+```mermaid
+graph LR;
+  0((0))
+  0 ---> 1((1))
+  0 ---> 2((2))
+  1 ---> 2
+```
+
+- Graph Representation 1: **Adjacency Matrix**
+
+  | s \ t | 0   | 1   | 2   |
+  | ----- | --- | --- | --- |
+  | **0** | 0   | 1   | 1   |
+  | **1** | 0   | 0   | 1   |
+  | **2** | 0   | 0   | 0   |
+
+  Runtime of printing the graph is $\Theta (V^2)$, where $V$ is the number of vertices and $E$ is the number of edges.
+  - To iterate over a vertex's neighbor: $\Theta (V)$
+  - $V$ vertices to consider
+
+- Graph Representation 2: **Edge Sets**
+
+  ```java
+  HashSet<Edge>: {(0, 1), (0, 2), (1, 2)} // where each edge is a pair of ints
+  ```
+
+- Graph Representation 3: **Adjacency Lists**
+
+  ```java
+  0 [] -> [1, 2]
+  1 [] -> [2]
+  2 []
+  ```
+
+  - Maintain **array of lists** indexed by vertex number (quite similar to Hash Tables)
+  - *Most popular approach for representing graphs*
+
+  Runtime of printing the graph is $\Theta (V+E)$, where $V$ is the number of vertices and $E$ is the number of edges.
+  - Create $V$ iterators
+  - Print $E$ times
+
+Runtime of some basic operations for each representation
+
+|                    | Adjacency Matrix | Edge Sets    | Adjacency List               |
+| ------------------ | ---------------- | ------------ | ---------------------------- |
+| `addEdge(s, t)`    | $\Theta (1)$     | $\Theta (1)$ | $\Theta (1)$                 |
+| `for (w : adj(v))` | $\Theta (V)$     | $\Theta (E)$ | $\Theta (1)$ to $\Theta (V)$ |
+| `print()`          | $\Theta (V^2)$   | $\Theta (E)$ | $\Theta (V+E)$               |
+| `hasEdge(s, t)`    | $\Theta (1)$     | $\Theta (E)$ | $\Theta (\text{degree} (v))$ |
+| **space used**     | $\Theta (V^2)$   | $\Theta (E)$ | $\Theta (V+E)$               |
+
+- `print()` and `hasEdge(s, t)` operations are not part of the `Graph` class's API
+- Many algorithms rely heavily on `adj(s)`
+- Most graphs are sparse (not many edges in each bucket)
+
+#### Graph Traversal Implementations and Runtime
+
+Depth First Search Implementation
+- Create a graph object
+- Pass the graph to a graph-processing method (or constructor) in a client class
+- Query the client class for information
+
+```java
+public class DepthFirstPaths {
+    private boolean[] marked;
+    private int[] edgeTo;
+    private int s;
+
+    public DepthFirstPaths(Graph G, int s) {
+        ...
+        dfs(G, s);                     // Constructor runtime
+    }
+  
+    private void dfs(Graph G, int v) { // vertex visits (no more than V calls)
+        marked[v] = true;
+        for (int w : G.adj(v)) {
+            if (!marked[w]) {          // edge considerations (no more than 2E calls)
+                edgeTo[w] = v;
+                dfs(G, w);
+            }        	
+        } 
+    }
+}
+```
+
+Runtime is $O(V+E)$
+- Each vertex is visited (number of `dfs` calls) at most once $O(V)$
+- Each edge is considered (number of `marked[w]` checks) at most twice $O(E)$
+- **CanNOT say** $O(E)$!
+  - Constructor has to create an all false `marked` array
+  - This marking of all vertices takes $O(V)$ time
+- **CanNOT say** $\Theta(V+E)$!
+  - Graph with no edges touching source
+
+Space is $\Theta (V)$
+- Need arrays of length V to store information
+
+> *Runtime analysis for* `BreathFirstPaths` *is similar, use links in the following table to see the demo.*
+
+| Problem                | Description                                             | Solution                                                                                                                                | Efficiency (using *adj. list*)        |
+| ---------------------- | ------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- |
+| **s-t paths**          | Find a path from `s` to every reachable vertex          | [`DepthFirstPaths`](https://docs.google.com/presentation/d/1lTo8LZUGi3XQ1VlOmBUF9KkJTW_JWsw_DOPq8VBiI3A/edit#slide=id.g76e0dad85_2_380) | $O(V+E)$ time <br> $\Theta (V)$ space |
+| **s-t shortest paths** | Find a shortest path from `s` to every reachable vertex | [`BreathFirstPaths`](https://docs.google.com/presentation/d/1JoYCelH4YE6IkSMq_LfTJMzJ00WxDj7rEa49gYmAtc4/edit?usp=sharing)              | $O(V+E)$ time <br> $\Theta (V)$ space |
+
+Choice of implementation has big impact on runtime and memory usage! 
+- `DFS` and `BFS` runtime with ***adjacency list***: $O(V+E)$
+- `DFS` and `BFS` runtime with ***adjacency matrix***: $O(V^2)$
 
 
 
