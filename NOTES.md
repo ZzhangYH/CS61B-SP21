@@ -100,6 +100,13 @@ Notes taken when auditing CS 61B, please refer to the original slides and lectur
     - [Graph API](#graph-api)
     - [Graph Representation and Runtime](#graph-representation-and-runtime)
     - [Graph Traversal Implementations and Runtime](#graph-traversal-implementations-and-runtime)
+- [Week 9](#week-9)
+  - [Lecture 23: Shortest Paths](#lecture-23-shortest-paths)
+    - [DFS vs. BFS](#dfs-vs-bfs)
+    - [Dijkstra's Algorithm](#dijkstras-algorithm)
+    - [Dijkstra's Correctness and Runtime](#dijkstras-correctness-and-runtime)
+    - [A\*](#a)
+    - [A\* Heuristics](#a-heuristics)
 
 </details>
 
@@ -1564,6 +1571,119 @@ Space is $\Theta (V)$
 Choice of implementation has big impact on runtime and memory usage! 
 - `DFS` and `BFS` runtime with ***adjacency list***: $O(V+E)$
 - `DFS` and `BFS` runtime with ***adjacency matrix***: $O(V^2)$
+
+## Week 9
+
+### Lecture 23: Shortest Paths
+
+#### DFS vs. BFS
+
+`BFS` vs. `DFS` for path finding
+- **Correctness** *Do they work for all graphs?*
+  - Yes!
+- **Output Quality** *Do they give better results？*
+  - `BFS` is 2-for-2 deal, not only do you get paths, but your paths are also guaranteed to be shortest.
+- **Time Efficiency** *Is one more efficient than the other?*
+  - Should be very similar. Both consider all edges twice.
+- **Space Efficiency** *Is one more efficient than the other?*
+  - `DFS` is worse for spindly graphs.
+    - Call stack gets very deep
+    - Computer needs $\Theta (V)$ memory to remember recursive calls
+  - `BFS` is worse for absurdly bushy graphs.
+    - Queue gets very large
+    - In the worst case, also $\Theta (V)$ memory
+  - In our implementations, we have to spend $\Theta (V)$ memory anyway to track `distTo` and `edgeTo` arrays, but we can optimize by storing `distTo` and `edgeTo` ***in a map instead of an array***.
+
+#### Dijkstra's Algorithm
+
+If `G` is a ***connected edge-weighted graph*** with $V$ vertices and $E$ edges
+- Always $V-1$ **Shortest Paths Tree** `SPT` edges!
+- For each vertex, there is exactly one input edge *(except source)*.
+
+Finding a **Shortest Paths Tree** `SPT`
+- Bad algorithm 1: 
+  - Perform a `DFS`. When you visit `v`: for each edge from `v` to `w`, if `w` is ***not already part of*** `SPT`, add the edge.
+- Bad algorithm 2:
+  - Perform a `DFS`. When you visit `v`: for each edge from `v` to `w`, add edge to the `SPT` ***only if that edge yields better distance***. -> this is what is called `relaxation`
+- `Dijkstra's Algorithm`:
+  - Perform a **best first search** (closest first). When you visit `v`: for each edge from `v` to `w`, ***relax that edge***.
+  - It is similar to `UCS` without a goal state, searches for shortest paths *from root to every other node* in a graph.
+
+#### Dijkstra's Correctness and Runtime
+
+Dijkstra's Algorithm Pseudo-code
+
+```
+- PQ.add(source, 0)
+- For other vertices v, PQ.add(v, ∞)
+- While PQ is not empty:
+  - p = PQ.removeSmallest()
+  - Relax all edges from p
+
+Relaxing an edge p -> q with weight w:
+- If distTo[p] + w < distTo[q]:
+  - distTo[q] = distTo[p] + w
+  - edgeTo[q] = p
+  - PQ.changePriority(q, distTo[q])
+```
+
+Key invariants and important properties
+- `edgeTo[v]` is the best known **predecessor** of `v`
+- `distTo[v]` is the best known **total distance from source to** `v`
+- `PQ` contains all unvisited vertices in order of `distTo`
+- Always visits vertices in order of total distance from source
+- ***Relaxation*** *always fails on edges to visited vertices*
+
+Guaranteed Optimality
+- At start, `distTo[source] = 0`, which is optimal.
+- After relaxing all edges from source, let vertex `v1` be the vertex with minimum weight, i.e. that is closest to the source.
+- `distTo[v1]` ***is optimal, and thus future relaxations will fail. Why?*** 
+  - `distTo[p] >= distTo[v1]` for all p, therefore
+  - `distTo[p] + w >= distTo[v1]`
+- Can use induction to prove that this holds for all vertices after dequeuing
+
+> *Dijkstra's can fail if graph has **negative weight edges**: Relaxation of already visited vertices can succeed.*
+
+Overall runtime: $O(V \log V + V \log V + E \log V)$
+- Assuming $E>V$, this is just $O(E \log V)$ for a connected graph
+
+|                  | # of operations | Cost per operation | Total cost    |
+| ---------------- | --------------- | ------------------ | ------------- |
+| `add`            | $V$             | $O(\log V)$        | $O(V \log V)$ |
+| `removeSmallest` | $V$             | $O(\log V)$        | $O(V \log V)$ |
+| `changePriority` | $E$             | $O(\log V)$        | $O(E \log V)$ |
+
+#### A*
+
+- Visit vertices in order of `d(source, v) + h(v, goal)`, where `h(v, goal)` *is an **estimate of the distance** from* `v` *to our goal*.
+- In other words, look at some location `v` if:
+  - We know already know the fastest way to reach `v`.
+  - AND we **suspect** that `v` is also the fastest way to the goal taking into account the time to get to `v`. 
+
+How do we get our estimate?
+- Estimate is an arbitrary ***heuristic*** `h(v, goal)`
+- ***heuristic**: "using experience to learn and improve"*
+- Doesn’t have to be perfect!
+
+#### A* Heuristics
+
+For our version of A* to give the correct answer, our A* heuristic must be:
+- ***Admissible***: `h(v, NYC)` <= **true distance** from `v` to `NYC`
+- ***Consistent***: For each neighbor of `w`
+  - `h(v, NYC) <= dist(v, w) + h(w, NYC)`
+  - where `dist(v, w)` is the *weight of the edge from* `v` *to* `w`
+
+> ***Admissible** means that the heuristic never overestimates.*
+
+**Admissibility** and **consistency** are sufficient conditions for certain variants of A*
+- *If heuristic is **admissible***, A* **tree** search yields the shortest path.
+- *If heuristic is **consistent***, A* **graph** search yields the shortest path.
+- These conditions are sufficient, but not necessary.
+
+| Problem                     | Description                                                                            | Solution                                                                                                                                     | Efficiency                                              |
+| --------------------------- | -------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| **shortest weighted paths** | Find the shortest path, considering weights, from `s` to ***every reachable*** vertex. | [`DijkstrasSP`](https://docs.google.com/presentation/d/1_bw2z1ggUkquPdhl7gwdVBoTaoJmaZdpkV6MoAgxlJc/pub?start=false&loop=false&delayms=3000) | $O(E \log V)$ time <br> $\Theta (V)$ space              |
+| **shortest weighted path**  | Find the shortest path, consider weights, from `s` to ***some target*** vertex         | [`A*`](https://docs.google.com/presentation/d/177bRUTdCa60fjExdr9eO04NHm0MRfPtCzvEup1iMccM/edit#slide=id.g369665031c_0_350)                  | Time depends on ***heuristic*** <br> $\Theta (V)$ space |
 
 
 
