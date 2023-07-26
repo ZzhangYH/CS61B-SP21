@@ -107,6 +107,10 @@ Notes taken when auditing CS 61B, please refer to the original slides and lectur
     - [Dijkstra's Correctness and Runtime](#dijkstras-correctness-and-runtime)
     - [A\*](#a)
     - [A\* Heuristics](#a-heuristics)
+  - [Lecture 24: Minimum Spanning Trees](#lecture-24-minimum-spanning-trees)
+    - [MST, Cut Property, Generic MST Algorithm](#mst-cut-property-generic-mst-algorithm)
+    - [Prim's Algorithm](#prims-algorithm)
+    - [Kruskal's Algorithm](#kruskals-algorithm)
 
 </details>
 
@@ -1684,6 +1688,92 @@ For our version of A* to give the correct answer, our A* heuristic must be:
 | --------------------------- | -------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
 | **shortest weighted paths** | Find the shortest path, considering weights, from `s` to ***every reachable*** vertex. | [`DijkstrasSP`](https://docs.google.com/presentation/d/1_bw2z1ggUkquPdhl7gwdVBoTaoJmaZdpkV6MoAgxlJc/pub?start=false&loop=false&delayms=3000) | $O(E \log V)$ time <br> $\Theta (V)$ space              |
 | **shortest weighted path**  | Find the shortest path, consider weights, from `s` to ***some target*** vertex         | [`A*`](https://docs.google.com/presentation/d/177bRUTdCa60fjExdr9eO04NHm0MRfPtCzvEup1iMccM/edit#slide=id.g369665031c_0_350)                  | Time depends on ***heuristic*** <br> $\Theta (V)$ space |
+
+### Lecture 24: Minimum Spanning Trees
+
+#### MST, Cut Property, Generic MST Algorithm
+
+Given an **undirected** graph, a ***spanning tree*** `T` is a subgraph of `G`, where `T`:
+- Is connected
+- Is acyclic
+- Includes all of the vertices
+
+`MST` vs. `SPT`
+- The `SPT` depends on the starting vertex because it tells you how to get **from a source to *everything***
+- There is ***NO SOURCE*** for a `MST`
+- Nonetheless, the `MST` sometimes happen to be an `SPT` for a specific vertex
+
+```mermaid
+graph LR;
+  A -- 2 --> B
+  B -- 2 --> D
+  A -- 3 --> D
+  D -- 2 --> C
+```
+
+> *The **Minimum Spanning Tree*** `MST` *is also a **Shortest Paths Tree*** `SPT` *starting from **node B**.*
+
+Cut Property
+- A **cut** is an assignment of a graph's nodes to two non-empty sets
+- A **crossing edge** is an edge which connects a node from one set to a node from the other set
+- ***Given any cut, minimum weight crossing edge is in the*** `MST`
+
+Generic `MST` Finding Algorithm
+- Start with no edges in the `MST`
+- Find a cut that has no crossing edges in the `MST`
+- Add smallest crossing edge to the `MST`
+- Repeat until V-1 edges
+
+#### Prim's Algorithm
+
+[[Implementation demo](https://docs.google.com/presentation/d/1GPizbySYMsUhnXSXKvbqV4UhPCvrt750MiqPPgU-eCY/edit#slide=id.g9a60b2f52_0_0)]
+- Start from some arbitrary start node
+- Repeatedly add ***shortest** edge* that has one node inside the `MST` under construction
+- Repeat until V-1 edges
+
+Prim's vs. Dijkstra's
+
+|                 | Prim's                                                       | Dijkstra's                                               |
+| --------------- | ------------------------------------------------------------ | -------------------------------------------------------- |
+| **Visit order** | In order of distance from the `MST` ***under construction*** | In order of distance from the ***source***               |
+| **Relaxation**  | Considers an edge better based on distance to **tree**       | Considers an edge better based on distance to **source** |
+
+Prim's runtime: $O(V \log V + V \log V + E \log V)$, this is just $O(E \log V)$ assuming $E>V$ \
+*(very much similar to that of **Dijkstra's**)*
+
+|                    | # of operations | Cost per operation | Total cost    |
+| ------------------ | --------------- | ------------------ | ------------- |
+| `add`              | $V$             | $O(\log V)$        | $O(V \log V)$ |
+| `delMin`           | $V$             | $O(\log V)$        | $O(V \log V)$ |
+| `decreasePriority` | $O(E)$          | $O(\log V)$        | $O(E \log V)$ |
+
+#### Kruskal's Algorithm
+
+[[Conceptual demo](https://docs.google.com/presentation/d/1RhRSYs9Jbc335P24p7vR-6PLXZUl-1EmeDtqieL9ad8/edit?usp=sharing)] [[Implementation demo](https://docs.google.com/presentation/d/1KpNiR7aLIEG9sm7HgX29nvf3yLD8_vdQEPa0ktQfuYc/edit?usp=sharing)]
+- Initially mark all edges gray
+- Consider edges in ***increasing** order of weight*
+- Add edge to `MST` unless doing so creates a cycle
+- Repeat until V-1 edges
+
+Kruskal's runtime: $O(E \log E)$, will be $O(E \log^* V)$ if we use a pre-sorted list of edges (instead of a PQ)
+
+| Operation          | Number of times | Time per operation | Total time      |
+| ------------------ | --------------- | ------------------ | --------------- |
+| **Insert**         | $E$             | $O(\log E)$        | $O(E \log E)$   |
+| **Delete minimum** | $O(E)$          | $O(\log E)$        | $O(E \log E)$   |
+| **union**          | $O(V)$          | $O(\log^* V)$      | $O(V \log^* V)$ |
+| **isConnected**    | $O(E)$          | $O(\log^* V)$      | $O(E \log^* V)$ |
+
+`SPT` & `MST` algorithms summary
+
+| Problem | Algorithm    | Runtime (if $E>V$)                                       | Notes                           |
+| ------- | ------------ | -------------------------------------------------------- | ------------------------------- |
+| `SPT`   | *Dijkstra's* | $O(E \log V)$                                            | Fails for negative weight edges |
+| `MST`   | *Prim's*     | $O(E \log V)$                                            | Analogous to *Dijkstra's*       |
+| `MST`   | *Kruskal's*  | $O(E \log E)$ <br> $O(E \log^* V)$ with pre-sorted edges | Uses WQUPC                      |
+
+
+
 
 
 
