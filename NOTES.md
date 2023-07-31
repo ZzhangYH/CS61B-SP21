@@ -111,6 +111,12 @@ Notes taken when auditing CS 61B, please refer to the original slides and lectur
     - [MST, Cut Property, Generic MST Algorithm](#mst-cut-property-generic-mst-algorithm)
     - [Prim's Algorithm](#prims-algorithm)
     - [Kruskal's Algorithm](#kruskals-algorithm)
+  - [Lecture 25: Range Searching and Multi-Dimensional Data](#lecture-25-range-searching-and-multi-dimensional-data)
+    - [Range-Finding and Nearest](#range-finding-and-nearest)
+    - [Multi-Dimensional Data](#multi-dimensional-data)
+    - [QuadTree](#quadtree)
+    - [Higher Dimensional Data](#higher-dimensional-data)
+    - [Uniform Partitioning](#uniform-partitioning)
 
 </details>
 
@@ -1771,6 +1777,105 @@ Kruskal's runtime: $O(E \log E)$, will be $O(E \log^* V)$ if we use a pre-sorted
 | `SPT`   | *Dijkstra's* | $O(E \log V)$                                            | Fails for negative weight edges |
 | `MST`   | *Prim's*     | $O(E \log V)$                                            | Analogous to *Dijkstra's*       |
 | `MST`   | *Kruskal's*  | $O(E \log E)$ <br> $O(E \log^* V)$ with pre-sorted edges | Uses WQUPC                      |
+
+### Lecture 25: Range Searching and Multi-Dimensional Data
+
+#### Range-Finding and Nearest
+
+```mermaid
+graph TD;
+  11 ---> 6
+  11 ---> 17
+  6 ---> 4
+  6 ---> 9
+  17 ---> 14
+  17 ---> 20
+  4 ---> 1
+  4 ---> 5
+```
+
+- `nearest(6)` returns 6
+- `nearest(8)` returns 9
+- `nearest(10)` returns 9 or 11
+
+Implementing `nearest(N)` operation with a `BST`
+- Just search for `N` and **record the closest item seen**
+- *Exploiting* `BST` *structure took less time than looking at all values*
+
+#### Multi-Dimensional Data
+
+In the **X**-oriented tree, the `A` node partitioned the universe into a left and right side.
+- **Left**: All points with X < -1
+- **Right**: All points with X > -1
+
+In the **Y**-oriented tree, the "A" node partitioned the universe into a top and bottom side.
+- **Bottom** *(left)*: All points with Y < -1
+- **Top** *(right)*: All points with Y > -1
+
+Consider trying to build a BST of Body objects in 2D space.
+- `earth.xPos = 1.5`, `earth.yPos = 1.6`
+- `mars.xPos = 1.0`, `mars.yPos = 2.8`
+- Could just pick either X or Y -oriented, but **losing some of your information about ordering**
+- Results in suboptimal pruning
+
+#### QuadTree
+
+A `QuadTree` is the simplest solution conceptually
+- Every Node has ***four*** children:
+  - **Top left**, a.k.a. *northwest*.
+  - **Top right**, a.k.a. *northeast*.
+  - **Bottom left**, a.k.a. *southwest*.
+  - **Bottom right**, a.k.a. *southeast*. 
+- Space is more finely divided in regions where there are more points
+- Results in better runtime in many circumstances
+
+> `QuadTree` *allow us to prune when performing a rectangle search: **Prune** (don't explore) **subspaces that don't intersect the query rectangle**.*
+
+#### Higher Dimensional Data
+
+Suppose we want to store objects in 3D space
+- QuadTree only have four directions, but in 3D, there are eight
+- One approach: Use an Oct-Tree or OcTree
+- To handle arbitrary number of dimensions, one common solution is a `k-d tree`
+  - **k-d** means "*k dimensional*"
+
+`k-d tree` example for ***2-d***:
+- Basic idea, ***root*** node partitions entire space into *left and right (by x)*.
+- All ***depth-1*** nodes partition subspace into *up and down (by y)*.
+- All ***depth-2*** nodes partition subspace into *left and right (by x)*.
+- Each point owns 2 subspaces
+  - similar to a `QuadTree`
+
+Just like **spatial partitioning** and `QuadTree`, `k-d tree` support an efficient nearest method
+- ***Do not explore subspaces that can't possible have a better answer than your current best***
+
+```
+nearest(Node n, Point goal, Node best):
+- If n is null, return best
+- If n.distance(goal) < best.distance(goal), best = n
+- If goal < n (according to n's comparator):
+    - goodSide = n."left/down"Child
+    - badSide = n."right/up"Child
+  - else
+    - goodSide = n."right/up"Child
+    - badSide = n."left/down"Child
+- best = nearest(goodSide, goal, best)
+- If badSide could still have something useful
+  - best = nearest(badSide, goal, best)
+- return best
+```
+
+#### Uniform Partitioning
+
+Uniform Partitioning isn't based on a tree at all
+- Partition space into ***uniform rectangular buckets*** (also called "*bins*")
+- Algorithm is still $\Theta (N)$, but it's faster than iterating over all points
+
+|               | Uniform Partitioning       | Hierarchical Partitioning       |
+| ------------- | -------------------------- | ------------------------------- |
+| **Models**    | N/A                        | `QuadTree` & `k-d tree`         |
+| **Subspaces** | Perfect grid of rectangles | Each node owns 4 or 2 subspaces |
+| **Strengths** | Easier to implement        | More finely divided             |
 
 
 
